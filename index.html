@@ -424,14 +424,14 @@
   import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // === 🛑 在這裡貼上你的 Firebase 設定 🛑 ===
-  const fallbackConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCuFAxYwAA8yTN4WvonaR50CBxy48Cq3d8",
+  authDomain: "equipment-86d63.firebaseapp.com",
+  projectId: "equipment-86d63",
+  storageBucket: "equipment-86d63.firebasestorage.app",
+  messagingSenderId: "565498970830",
+  appId: "1:565498970830:web:2737b31d51b67357dc869f"
+};
 
   const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'school-booking-app-v3';
