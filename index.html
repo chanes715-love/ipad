@@ -35,17 +35,11 @@
 
     h1, h2, h3, .app-title { font-family: 'Fredoka', 'Microsoft JhengHei', sans-serif; color: var(--primary-light); }
 
-    /* 平板漂浮動畫 */
-    @keyframes float {
-      0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
-      100% { transform: translateY(0px) rotate(0deg); }
-    }
+    /* 背景平板插圖設定 (靜止不晃動) */
     .bg-illustration {
       position: fixed;
       opacity: 0.85;
       z-index: 0;
-      animation: float 6s ease-in-out infinite;
       pointer-events: none;
     }
     
@@ -196,36 +190,36 @@
 <body>
 
 <!-- 1. 極簡風直式平板 -->
-<div class="bg-illustration" style="top: 8%; left: 5%; width: 110px; height: 150px; animation-delay: 0s;">
+<div class="bg-illustration" style="top: 8%; left: 5%; width: 110px; height: 150px;">
   <svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="10" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><rect x="40" y="40" width="40" height="40" rx="8" fill="#38b2ac" opacity="0.8"/><rect x="40" y="90" width="40" height="10" rx="4" fill="#a0aec0" opacity="0.6"/><circle cx="60" cy="148" r="4" fill="#cbd5e0"/></svg>
 </div>
 <!-- 2. 橫式白底滿版App平板 -->
-<div class="bg-illustration" style="top: 15%; right: 8%; width: 150px; height: 110px; animation-delay: 1.5s; transform: rotate(15deg);">
+<div class="bg-illustration" style="top: 15%; right: 8%; width: 150px; height: 110px; transform: rotate(15deg);">
   <svg viewBox="0 0 160 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="140" height="100" rx="8" fill="#f1f5f9"/><rect x="15" y="15" width="130" height="90" fill="#0077b6"/><rect x="25" y="25" width="15" height="15" rx="3" fill="#ffffff"/><rect x="50" y="25" width="15" height="15" rx="3" fill="#ff4d6d"/><rect x="75" y="25" width="15" height="15" rx="3" fill="#06d6a0"/><rect x="100" y="25" width="15" height="15" rx="3" fill="#ffd166"/><line x1="10" y1="60" x2="15" y2="60" stroke="#94a3b8" stroke-width="2"/></svg>
 </div>
 <!-- 3. 藍邊帶觸控筆的平板 -->
-<div class="bg-illustration" style="bottom: 12%; left: 8%; width: 140px; height: 140px; animation-delay: 2.5s; transform: rotate(-10deg);">
+<div class="bg-illustration" style="bottom: 12%; left: 8%; width: 140px; height: 140px; transform: rotate(-10deg);">
   <svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/><ellipse cx="123" cy="36" rx="4" ry="6" fill="#023e8a" transform="rotate(35 123 36)"/></svg>
 </div>
 <!-- 4. 附帶支架的橫放平板 -->
-<div class="bg-illustration" style="bottom: 18%; right: 6%; width: 150px; height: 110px; animation-delay: 0.5s;">
+<div class="bg-illustration" style="bottom: 18%; right: 6%; width: 150px; height: 110px;">
   <svg viewBox="0 0 160 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><polygon points="10,110 30,30 150,30 130,110" fill="#03045e"/><rect x="25" y="35" width="115" height="70" rx="3" fill="#fca311" transform="skewX(-14)"/><rect x="50" y="45" width="60" height="40" rx="2" fill="#ffffff" transform="skewX(-14)"/><path d="M 60 70 Q 75 45 90 70 T 110 50" fill="none" stroke="#14213d" stroke-width="3" stroke-linecap="round" transform="skewX(-14)"/><line x1="140" y1="20" x2="105" y2="75" stroke="#e5e5e5" stroke-width="5" stroke-linecap="round"/><rect x="35" y="90" width="8" height="8" rx="2" fill="#00b4d8" transform="skewX(-14)"/><rect x="48" y="90" width="8" height="8" rx="2" fill="#ef233c" transform="skewX(-14)"/><rect x="61" y="90" width="8" height="8" rx="2" fill="#ffb703" transform="skewX(-14)"/></svg>
 </div>
 
 <div id="loginOverlay">
-  <!-- 登入畫面的漂浮平板 -->
-  <div class="bg-illustration" style="top: 10%; left: 10%; width: 150px; height: 150px; animation-delay: 1s;"><svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/></svg></div>
-  <div class="bg-illustration" style="bottom: 15%; right: 10%; width: 140px; height: 140px; animation-delay: 0.5s; transform: rotate(-20deg);"><svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="8" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><circle cx="60" cy="70" r="30" fill="#38b2ac" opacity="0.6"/><circle cx="80" cy="90" r="25" fill="#ed8936" opacity="0.6"/><circle cx="40" cy="100" r="20" fill="#ecc94b" opacity="0.6"/></svg></div>
+  <!-- 登入畫面的靜態平板 -->
+  <div class="bg-illustration" style="top: 10%; left: 10%; width: 150px; height: 150px;"><svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/></svg></div>
+  <div class="bg-illustration" style="bottom: 15%; right: 10%; width: 140px; height: 140px; transform: rotate(-20deg);"><svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="8" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><circle cx="60" cy="70" r="30" fill="#38b2ac" opacity="0.6"/><circle cx="80" cy="90" r="25" fill="#ed8936" opacity="0.6"/><circle cx="40" cy="100" r="20" fill="#ecc94b" opacity="0.6"/></svg></div>
 
   <div class="login-wrapper">
     <div class="login-box">
       <h2>設備預約登入</h2>
       
-      <select id="loginNameSelect" class="login-input" style="margin-bottom: 15px;">
+      <select id="loginNameSelect" class="login-input" style="margin-bottom: 15px;" aria-label="選擇您的姓名" autocomplete="username">
         <option value="">載入名單中...</option>
       </select>
       
-      <input type="password" id="loginPinInput" class="login-input" placeholder="請輸入密碼" style="margin-bottom: 10px;">
+      <input type="password" id="loginPinInput" class="login-input" placeholder="請輸入密碼" style="margin-bottom: 10px;" aria-label="請輸入密碼" autocomplete="current-password">
       
       <div style="font-size: 10pt; color: #555; text-align: left; margin-bottom: 25px; line-height: 1.5; background: #e0fbfc; padding: 12px; border-radius: 10px; border: 2px dashed #caf0f8; font-weight: 600;">
         💡 請選擇您的姓名，並輸入密碼登入。<br>
@@ -264,7 +258,7 @@
         <div id="adminPanel" class="admin-panel" style="display:none;">
           <h3>👨‍💻 代客預約 / 身分切換</h3>
           <div class="admin-controls" style="display:flex; gap:10px;">
-            <select id="adminSwitchName" class="admin-input"></select>
+            <select id="adminSwitchName" class="admin-input" aria-label="選擇要切換代理的使用者"></select>
             <button id="btnSwitch" class="btn-admin-active" onclick="window.switchUserProxy()">切換</button>
             <button id="btnReset" class="btn-admin-inactive" onclick="window.resetUserProxy()">還原本人</button>
           </div>
@@ -278,11 +272,11 @@
 
         <div class="booking-controls">
           <div>
-            <label>📅 借用日期</label>
+            <label for="targetDate">📅 借用日期</label>
             <input type="date" id="targetDate" onchange="window.refreshBooking()">
           </div>
           <div>
-            <label>💻 選擇設備/教室</label>
+            <label for="itemSelect">💻 選擇設備/教室</label>
             <select id="itemSelect" onchange="window.refreshBooking()"></select>
           </div>
         </div>
@@ -312,7 +306,7 @@
         <!-- 每日狀態 -->
         <div id="admin-page1">
           <div style="background:#e0fbfc; padding:20px; border-radius:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
-            <label style="font-weight:bold;">📅 查看日期</label>
+            <label for="adminDate" style="font-weight:bold;">📅 查看日期</label>
             <input type="date" id="adminDate" onchange="window.loadAdminDaily()" style="padding:10px; border-radius:8px; border:1px solid #94d2bd; flex-grow:1; max-width:250px;">
           </div>
           <div id="adminDailyList"></div>
@@ -321,17 +315,17 @@
         <!-- 禁借設定 -->
         <div id="admin-page2" style="display:none;">
           <div class="form-row">
-            <label class="title">🚫 選擇禁借設備/教室</label>
+            <label class="title" for="resItem">🚫 選擇禁借設備/教室</label>
             <select id="resItem" class="admin-input"></select>
           </div>
           <div class="form-row">
-            <label class="title">📅 影響日期範圍</label>
+            <label class="title" for="resStartDate">📅 影響日期範圍</label>
             <div class="date-group">
-              <input type="date" id="resStartDate" class="admin-input"> <span style="font-weight:bold; color:#777;">至</span> <input type="date" id="resEndDate" class="admin-input">
+              <input type="date" id="resStartDate" class="admin-input" aria-label="禁借開始日期"> <span style="font-weight:bold; color:#777;">至</span> <input type="date" id="resEndDate" class="admin-input" aria-label="禁借結束日期">
             </div>
           </div>
           <div class="form-row">
-            <label class="title">📌 適用星期 (可複選)</label>
+            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: #444; font-size: 11pt;">📌 適用星期 (可複選)</div>
             <div class="check-grid" id="dayChecks">
               <label class="check-item"><input type="checkbox" name="dCheck" value="1" checked> 週一</label>
               <label class="check-item"><input type="checkbox" name="dCheck" value="2" checked> 週二</label>
@@ -343,11 +337,11 @@
             </div>
           </div>
           <div class="form-row">
-            <label class="title">⏱️ 禁借節次 (可複選)</label>
+            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: #444; font-size: 11pt;">⏱️ 禁借節次 (可複選)</div>
             <div id="periodChecks" class="check-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));"></div>
           </div>
           <div class="form-row">
-            <label class="title">📝 備註原因</label>
+            <label class="title" for="resNote">📝 備註原因</label>
             <input type="text" id="resNote" class="admin-input" placeholder="例如：設備維修中、期末盤點...">
           </div>
           <button id="resSubmitBtn" class="btn-submit" onclick="window.submitRestrict()">確認並寫入設定</button>
@@ -367,7 +361,7 @@
           </div>
           <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap: wrap;">
              <button onclick="window.openAddUserModal()" class="btn-admin-active">➕ 手動新增帳號</button>
-             <label class="btn-admin-inactive" style="cursor:pointer; display:flex; align-items:center;">
+             <label for="excelUpload" class="btn-admin-inactive" style="cursor:pointer; display:flex; align-items:center;">
                📁 Excel 批次匯入
                <input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display:none;" onchange="window.importExcel(event)">
              </label>
@@ -388,7 +382,7 @@
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">💻 設備 / 專科教室清單</h3>
               <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新設備或教室名稱...">
+                <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新設備或教室名稱..." aria-label="輸入新設備或教室名稱">
                 <button class="btn-admin-active" onclick="window.addItemConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="itemsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
@@ -398,7 +392,7 @@
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">🏫 班級清單設定</h3>
               <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新班級 (如: 401、科任)...">
+                <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新班級 (如: 401、科任)..." aria-label="輸入新班級名稱">
                 <button class="btn-admin-active" onclick="window.addClassConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
@@ -418,14 +412,14 @@
 <div id="modal">
   <h3 style="color:var(--primary); margin-top:0;">確認預約</h3>
   <div id="confirmDetail" style="font-size:11pt; background:#e0fbfc; padding:15px; border-radius:10px; margin-bottom:20px; line-height:1.6; border: 2px dashed #caf0f8; color: var(--primary);"></div>
-  <label style="font-size: 11pt; font-weight:bold; color: var(--primary);">👤 借用人</label>
+  <label for="userName" style="font-size: 11pt; font-weight:bold; color: var(--primary);">👤 借用人</label>
   <input type="text" id="userName" class="modal-input" readonly style="background:#f1f5f9; color:#64748b; border-style: dashed;">
-  <label style="font-size: 11pt; font-weight:bold; color: var(--primary);">📝 用途</label>
+  <label for="purposeType" style="font-size: 11pt; font-weight:bold; color: var(--primary);">📝 用途</label>
   <select id="purposeType" class="modal-input" onchange="window.togglePurpose()">
     <option value="class">班級使用</option><option value="other">其他用途</option>
   </select>
-  <div id="classDiv"><select id="classSelect" class="modal-input"></select></div>
-  <div id="otherDiv" style="display:none;"><input type="text" id="otherPurpose" class="modal-input" placeholder="請輸入用途"></div>
+  <div id="classDiv"><select id="classSelect" class="modal-input" aria-label="選擇使用班級"></select></div>
+  <div id="otherDiv" style="display:none;"><input type="text" id="otherPurpose" class="modal-input" placeholder="請輸入用途" aria-label="請輸入其他用途"></div>
   <button onclick="window.submitBooking()" style="width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold; font-size:12pt; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.4);">送出預約</button>
 </div>
 
@@ -460,8 +454,6 @@ const firebaseConfig = {
   messagingSenderId: "565498970830",
   appId: "1:565498970830:web:2737b31d51b67357dc869f"
 };
-
-
 
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'school-booking-app-v3';
 
@@ -1247,10 +1239,10 @@ const firebaseConfig = {
       const modal = document.getElementById('customModal');
       document.getElementById('customModalTitle').innerText = "➕ 新增教師帳號";
       document.getElementById('customModalBody').innerHTML = `
-          <input type="text" id="newUserName" class="modal-input modal-input-admin" placeholder="姓名 (如: 陳老師)">
-          <input type="text" id="newUserAcc" class="modal-input modal-input-admin" placeholder="登入帳號 (或 Email)">
-          <input type="text" id="newUserPin" class="modal-input modal-input-admin" placeholder="登入密碼">
-          <select id="newUserRole" class="modal-input modal-input-admin">
+          <input type="text" id="newUserName" class="modal-input modal-input-admin" placeholder="姓名 (如: 陳老師)" aria-label="教師姓名" autocomplete="name">
+          <input type="text" id="newUserAcc" class="modal-input modal-input-admin" placeholder="登入帳號 (或 Email)" aria-label="登入帳號" autocomplete="username">
+          <input type="text" id="newUserPin" class="modal-input modal-input-admin" placeholder="登入密碼" aria-label="登入密碼" autocomplete="new-password">
+          <select id="newUserRole" class="modal-input modal-input-admin" aria-label="選擇權限角色">
              <option value="false">一般教師</option>
              <option value="true">系統管理員</option>
           </select>
@@ -1286,8 +1278,8 @@ const firebaseConfig = {
       document.getElementById('customModalTitle').innerText = "🔑 修改登入密碼";
       document.getElementById('customModalBody').innerHTML = `
           <div style="font-size:10pt; color:#666; margin-bottom:15px; text-align:left;">請輸入您的新密碼。變更後，下次登入請使用新密碼。</div>
-          <input type="password" id="newPwdInput" class="modal-input modal-input-admin" placeholder="請輸入新密碼">
-          <input type="password" id="newPwdConfirm" class="modal-input modal-input-admin" placeholder="再次確認新密碼">
+          <input type="password" id="newPwdInput" class="modal-input modal-input-admin" placeholder="請輸入新密碼" aria-label="請輸入新密碼" autocomplete="new-password">
+          <input type="password" id="newPwdConfirm" class="modal-input modal-input-admin" placeholder="再次確認新密碼" aria-label="再次確認新密碼" autocomplete="new-password">
       `;
       document.getElementById('customModalSubmit').onclick = async function() {
           const p1 = document.getElementById('newPwdInput').value;
@@ -1368,5 +1360,7 @@ const firebaseConfig = {
   initFirebase();
 
 </script>
+</body>
+</html>
 </body>
 </html>
