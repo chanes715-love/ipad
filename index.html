@@ -306,6 +306,7 @@
           <div id="admin-t2" class="admin-tab" onclick="window.switchAdminTab(2)">⚙️ 批次禁借設定</div>
           <div id="admin-t3" class="admin-tab" onclick="window.switchAdminTab(3)">📊 統計圖表</div>
           <div id="admin-t4" class="admin-tab" onclick="window.switchAdminTab(4)">👥 帳號管理</div>
+          <div id="admin-t5" class="admin-tab" onclick="window.switchAdminTab(5)">🛠️ 設備與班級設定</div>
         </div>
 
         <!-- 每日狀態 -->
@@ -379,6 +380,33 @@
           <div id="userTableContainer" style="overflow-x:auto;"></div>
         </div>
 
+        <!-- 設備與班級設定 -->
+        <div id="admin-page5" style="display:none;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <!-- 設備/教室管理 -->
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
+              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">💻 設備 / 專科教室清單</h3>
+              <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新設備或教室名稱...">
+                <button class="btn-admin-active" onclick="window.addItemConfig()" style="white-space:nowrap;">➕ 新增</button>
+              </div>
+              <div id="itemsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
+            </div>
+
+            <!-- 班級清單管理 -->
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
+              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">🏫 班級清單設定</h3>
+              <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新班級 (如: 401、科任)...">
+                <button class="btn-admin-active" onclick="window.addClassConfig()" style="white-space:nowrap;">➕ 新增</button>
+              </div>
+              <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -434,6 +462,7 @@ const firebaseConfig = {
 };
 
 
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'school-booking-app-v3';
 
   let app, db, auth, userId;
@@ -549,8 +578,18 @@ const firebaseConfig = {
 
     const savedUser = localStorage.getItem('appAuthSession_FB_v3');
     if (savedUser) {
-      staticData.userInfo = JSON.parse(savedUser);
-      initSPA();
+      const parsedUser = JSON.parse(savedUser);
+      // 從資料庫最新名單重新驗證該使用者的真實權限，避免快取殘留管理員權限
+      const dbUser = staticData.users.find(u => u.name === parsedUser.name || (u.account && u.account === parsedUser.account));
+      if (dbUser) {
+        parsedUser.isAdmin = dbUser.isAdmin === true || dbUser.isAdmin === 'true';
+        localStorage.setItem('appAuthSession_FB_v3', JSON.stringify(parsedUser));
+        staticData.userInfo = parsedUser;
+        initSPA();
+      } else {
+        localStorage.removeItem('appAuthSession_FB_v3');
+        document.getElementById('loginOverlay').style.display = 'flex';
+      }
     } else {
       document.getElementById('loginOverlay').style.display = 'flex';
     }
@@ -581,10 +620,11 @@ const firebaseConfig = {
     btn.innerText = "驗證中..."; btn.disabled = true;
 
     // 比對選擇的名字與密碼
-    const userObj = staticData.users.find(u => u.name === selectedName && u.pin === pin);
+    const userObj = staticData.users.find(u => u.name === selectedName && String(u.pin) === String(pin));
     
     if (userObj) {
-        const authData = { name: userObj.name, account: userObj.account, email: userObj.email, isAdmin: userObj.isAdmin };
+        const isTrueAdmin = userObj.isAdmin === true || userObj.isAdmin === 'true';
+        const authData = { name: userObj.name, account: userObj.account, email: userObj.email, isAdmin: isTrueAdmin };
         localStorage.setItem('appAuthSession_FB_v3', JSON.stringify(authData));
         staticData.userInfo = authData;
         btn.innerText = "Login 登入"; btn.disabled = false;
@@ -597,6 +637,14 @@ const firebaseConfig = {
 
   window.doLogout = function(isAutoLogout = false) {
     localStorage.removeItem('appAuthSession_FB_v3');
+    // 清除管理員暫存與代理狀態
+    originalAdminName = "";
+    originalAdminAccount = "";
+    spoofedUserName = "";
+    document.getElementById('proxyAlert').style.display = 'none';
+    document.getElementById('nav-admin').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'none';
+
     document.getElementById('mainApp').style.display = 'none';
     document.getElementById('loginOverlay').style.display = 'flex';
     document.getElementById('loginPinInput').value = '';
@@ -607,24 +655,27 @@ const firebaseConfig = {
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     
+    // 重設代理狀態，確保登入時以本人身分開始
+    spoofedUserName = "";
+    document.getElementById('proxyAlert').style.display = 'none';
+
     document.getElementById('displayUserName').innerText = staticData.userInfo.name;
     document.getElementById('userName').value = staticData.userInfo.name;
     
-    const isUserAdmin = staticData.userInfo.isAdmin === true || staticData.userInfo.isAdmin === 'true';
+    const isUserAdmin = staticData.userInfo && (staticData.userInfo.isAdmin === true || staticData.userInfo.isAdmin === 'true');
     if (isUserAdmin) {
       document.getElementById('nav-admin').style.display = 'inline-block';
       document.getElementById('adminPanel').style.display = 'block';
-      if (!originalAdminName) { 
-          originalAdminName = staticData.userInfo.name; 
-          originalAdminAccount = staticData.userInfo.account; 
-      }
+      originalAdminName = staticData.userInfo.name; 
+      originalAdminAccount = staticData.userInfo.account; 
     } else {
       document.getElementById('nav-admin').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'none';
     }
 
     initDropdowns();
-    window.refreshBooking();
+    // 每次登入預設強制切換回「我要預約」首頁，防止停留在上一個使用者的管理後台畫面
+    window.switchAppView('booking');
   }
 
   function initDropdowns() {
@@ -646,6 +697,12 @@ const firebaseConfig = {
   }
 
   window.switchAppView = function(viewId) {
+    const isUserAdmin = staticData.userInfo && (staticData.userInfo.isAdmin === true || staticData.userInfo.isAdmin === 'true');
+    if (viewId === 'admin' && !isUserAdmin) {
+      showSystemAlert("⛔ 權限不足！只有系統管理員可以進入管理後台。");
+      return;
+    }
+
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     document.getElementById('nav-' + viewId).classList.add('active');
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -896,7 +953,7 @@ const firebaseConfig = {
   };
 
   window.switchAdminTab = function(n) {
-    for(let i=1; i<=4; i++) {
+    for(let i=1; i<=5; i++) {
         const page = document.getElementById('admin-page'+i);
         const tab = document.getElementById('admin-t'+i);
         if(page) page.style.display = n === i ? 'block' : 'none';
@@ -906,6 +963,95 @@ const firebaseConfig = {
     if (n === 1) window.loadAdminDaily();
     else if (n === 3) window.loadChart();
     else if (n === 4) window.renderUserTable();
+    else if (n === 5) window.renderConfigLists();
+  };
+
+  // ================= 設備與班級設定管理 =================
+  window.saveConfigListsToDB = async function() {
+    try {
+      await updateDoc(getPublicDoc('config', 'main'), {
+        items: staticData.items,
+        classes: staticData.classes
+      });
+      initDropdowns();
+    } catch(err) {
+      console.error(err);
+      showSystemAlert("儲存設定失敗：" + err.message);
+    }
+  };
+
+  window.renderConfigLists = function() {
+    const itemsBox = document.getElementById('itemsListContainer');
+    if (itemsBox) {
+      if (staticData.items.length === 0) {
+        itemsBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無設備項目</div>';
+      } else {
+        itemsBox.innerHTML = staticData.items.map((item, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0;">
+            <span style="font-weight:bold; color:#333;">${item}</span>
+            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteItemConfig(${idx})">刪除</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    const classesBox = document.getElementById('classesListContainer');
+    if (classesBox) {
+      if (staticData.classes.length === 0) {
+        classesBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無班級項目</div>';
+      } else {
+        classesBox.innerHTML = staticData.classes.map((cls, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0;">
+            <span style="font-weight:bold; color:#333;">${cls}</span>
+            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteClassConfig(${idx})">刪除</button>
+          </div>
+        `).join('');
+      }
+    }
+  };
+
+  window.addItemConfig = async function() {
+    const input = document.getElementById('newItemInput');
+    const val = input.value.trim();
+    if (!val) { showSystemAlert("請輸入設備或專科教室名稱！"); return; }
+    if (staticData.items.includes(val)) { showSystemAlert("⚠️ 該設備/教室名稱已存在！"); return; }
+    
+    staticData.items.push(val);
+    input.value = '';
+    await window.saveConfigListsToDB();
+    window.renderConfigLists();
+    showSystemAlert(`✅ 已新增設備/教室：「${val}」`);
+  };
+
+  window.deleteItemConfig = function(idx) {
+    const target = staticData.items[idx];
+    window.showSystemConfirm(`確定要刪除「${target}」嗎？`, async () => {
+      staticData.items.splice(idx, 1);
+      await window.saveConfigListsToDB();
+      window.renderConfigLists();
+    });
+  };
+
+  window.addClassConfig = async function() {
+    const input = document.getElementById('newClassInput');
+    const val = input.value.trim();
+    if (!val) { showSystemAlert("請輸入班級名稱！"); return; }
+    if (staticData.classes.includes(val)) { showSystemAlert("⚠️ 該班級名稱已存在！"); return; }
+    
+    staticData.classes.push(val);
+    input.value = '';
+    await window.saveConfigListsToDB();
+    window.renderConfigLists();
+    showSystemAlert(`✅ 已新增班級：「${val}」`);
+  };
+
+  window.deleteClassConfig = function(idx) {
+    const target = staticData.classes[idx];
+    window.showSystemConfirm(`確定要刪除班級「${target}」嗎？`, async () => {
+      staticData.classes.splice(idx, 1);
+      await window.saveConfigListsToDB();
+      window.renderConfigLists();
+    });
   };
 
   window.loadAdminDaily = async function() {
@@ -1043,20 +1189,43 @@ const firebaseConfig = {
   };
 
   window.renderUserTable = function() {
-      let html = `<table><tr><th style="width:20%">姓名</th><th style="width:30%">帳號/Email</th><th style="width:25%">權限</th><th style="width:25%">操作</th></tr>`;
+      let html = `<table><tr><th style="width:20%">姓名</th><th style="width:28%">帳號/Email</th><th style="width:22%">權限身分</th><th style="width:30%">操作</th></tr>`;
       staticData.users.forEach((u, i) => {
-          const roleTxt = u.isAdmin ? '<span style="color:var(--admin-purple); font-weight:bold;">管理員</span>' : '<span style="color:#78909c;">一般教師</span>';
+          const isUserAdmin = u.isAdmin === true || u.isAdmin === 'true';
+          const roleTxt = isUserAdmin 
+            ? '<span style="color:var(--admin-purple); font-weight:bold; background:#e0fbfc; padding:4px 10px; border-radius:12px;">管理員</span>' 
+            : '<span style="color:#78909c;">一般教師</span>';
+          const toggleRoleBtnTxt = isUserAdmin ? '設為一般教師' : '設為管理員';
           html += `<tr>
               <td style="font-weight:bold;">${u.name}</td>
               <td style="color:#555;">${u.account || u.email || '--'}</td>
               <td>${roleTxt}</td>
               <td>
-                  <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteUser(${i})">刪除</button>
+                  <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+                    <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.toggleUserRole(${i})">${toggleRoleBtnTxt}</button>
+                    <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteUser(${i})">刪除</button>
+                  </div>
               </td>
           </tr>`;
       });
       html += `</table>`;
       document.getElementById('userTableContainer').innerHTML = html;
+  };
+
+  window.toggleUserRole = function(index) {
+      const targetUser = staticData.users[index];
+      if (targetUser.account === staticData.userInfo.account || targetUser.name === staticData.userInfo.name) {
+          showSystemAlert("⚠️ 您不能解除自己目前的管理員權限！");
+          return;
+      }
+      const currentAdmin = targetUser.isAdmin === true || targetUser.isAdmin === 'true';
+      const newRoleName = currentAdmin ? "一般教師" : "管理員";
+      window.showSystemConfirm(`確定要將「${targetUser.name}」的權限更改為【${newRoleName}】嗎？`, async () => {
+          staticData.users[index].isAdmin = !currentAdmin;
+          await window.saveUsersToDB();
+          window.renderUserTable();
+          showSystemAlert(`✅ 已將「${targetUser.name}」設為${newRoleName}。`);
+      });
   };
 
   window.deleteUser = function(index) {
@@ -1160,7 +1329,8 @@ const firebaseConfig = {
                   const email = row['電子郵件'] || row['Email'] || row['email'] || row['信箱'];
                   const account = row['帳號'] || row['Account'] || (email ? String(email).split('@')[0] : '');
                   const pin = row['密碼'] || row['Password'] || account || '123456'; // 若無密碼預設為帳號或 123456
-                  const isAdmin = row['權限'] === '管理員' || row['isAdmin'] === true;
+                  const roleVal = String(row['權限'] || row['身分'] || row['isAdmin'] || '').trim();
+                  const isAdmin = roleVal === '管理員' || roleVal.toLowerCase() === 'true';
                   
                   if(name) {
                       // 以「姓名」作為唯一識別，避免重複加入同名老師
