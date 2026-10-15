@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>長安教學設備借用系統</title>
+  <title>教學設備與專科教室借用系統</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- 引入 SheetJS 來處理 Excel 匯入 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -146,6 +146,49 @@
     .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 10pt; font-weight: bold; display: inline-block; }
     .status-cancelled { background: #ffebee; color: var(--danger); border: 1px solid #ffccd5; }
     
+    #initialLoader {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .loader-box {
+      background: white;
+      padding: 35px 45px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(18, 130, 162, 0.18);
+      text-align: center;
+      border-top: 8px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #caf0f8;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text {
+      font-size: 13pt;
+      font-weight: bold;
+      color: var(--primary-light);
+      letter-spacing: 1px;
+    }
+    .loader-subtext {
+      font-size: 10pt;
+      color: #6c757d;
+    }
+
     #loginOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9998; align-items:center; justify-content:center; }
     .login-wrapper { position: relative; width: 350px; max-width: 90%; }
     .login-box { background: var(--container-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(18, 130, 162, 0.2); text-align: center; position: relative; z-index: 10; border-top: 8px solid var(--primary);}
@@ -189,6 +232,15 @@
 </head>
 <body>
 
+<!-- 網頁初始載入等待畫面 -->
+<div id="initialLoader">
+  <div class="loader-box">
+    <div class="spinner"></div>
+    <div class="loader-text">系統載入中...</div>
+    <div class="loader-subtext">正在連線至雲端資料庫，請稍候 💻</div>
+  </div>
+</div>
+
 <!-- 1. 極簡風直式平板 -->
 <div class="bg-illustration" style="top: 8%; left: 5%; width: 110px; height: 150px;">
   <svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="10" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><rect x="40" y="40" width="40" height="40" rx="8" fill="#38b2ac" opacity="0.8"/><rect x="40" y="90" width="40" height="10" rx="4" fill="#a0aec0" opacity="0.6"/><circle cx="60" cy="148" r="4" fill="#cbd5e0"/></svg>
@@ -223,7 +275,7 @@
       
       <div style="font-size: 10pt; color: #555; text-align: left; margin-bottom: 25px; line-height: 1.5; background: #e0fbfc; padding: 12px; border-radius: 10px; border: 2px dashed #caf0f8; font-weight: 600;">
         💡 請選擇您的姓名，並輸入密碼登入。<br>
-        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴)</span>
+        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴或 123456)</span>
       </div>
       
       <button id="btnLoginSubmit" class="btn-login" onclick="window.doLogin()">Login 登入</button>
@@ -237,7 +289,7 @@
     <div class="main-content">
       
       <div class="app-header">
-        <h1 class="app-title">Ipad Equipment 💻</h1>
+        <h1 class="app-title">Lab Equipment 💻</h1>
         <div class="header-user">
           <span id="displayUserName">使用者</span>
           <button class="btn-logout" onclick="window.doLogout(false)">登出</button>
@@ -368,7 +420,7 @@
           </div>
           <div style="font-size: 10pt; color: #78909c; margin-bottom: 10px; line-height: 1.5;">
              ※ 批次匯入 Excel 支援多種欄位名稱：<br>
-             系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> <br>
+             系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 或預設為 123456。<br>
              若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
           </div>
           <div id="userTableContainer" style="overflow-x:auto;"></div>
@@ -446,7 +498,7 @@
   import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // === 🛑 在這裡貼上你的 Firebase 設定 🛑 ===
-const firebaseConfig = {
+ const firebaseConfig = {
   apiKey: "AIzaSyCuFAxYwAA8yTN4WvonaR50CBxy48Cq3d8",
   authDomain: "equipment-86d63.firebaseapp.com",
   projectId: "equipment-86d63",
@@ -462,6 +514,15 @@ const firebaseConfig = {
   function getPublicCol(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
   function getPublicDoc(colName, docId) { return doc(db, 'artifacts', appId, 'public', 'data', colName, docId); }
 
+  function hideInitialLoader() {
+    const loader = document.getElementById('initialLoader');
+    if (loader) {
+      loader.style.opacity = '0';
+      loader.style.visibility = 'hidden';
+      setTimeout(() => { loader.style.display = 'none'; }, 400);
+    }
+  }
+
   async function initFirebase() {
     try {
       app = initializeApp(firebaseConfig);
@@ -476,9 +537,12 @@ const firebaseConfig = {
       userId = auth.currentUser.uid;
       
       await ensureSeedData();
-      initializeAppFrontend();
+      await initializeAppFrontend();
+      hideInitialLoader();
     } catch (error) {
       console.error("Firebase 初始化失敗:", error);
+      hideInitialLoader();
+      document.getElementById('loginOverlay').style.display = 'flex';
       showSystemAlert("⚠️ 無法連接到資料庫。請確認 Firebase Config 設定正確。");
     }
   }
@@ -1360,7 +1424,5 @@ const firebaseConfig = {
   initFirebase();
 
 </script>
-</body>
-</html>
 </body>
 </html>
