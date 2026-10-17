@@ -65,8 +65,11 @@
     .cell-past { background: var(--past); color: #555; border-radius: 8px; padding: 6px; display: inline-block; width: 90%; font-weight: 600; }
     .cell-restricted { color: #888; font-size: 10pt; background: #f8f9fa; font-weight: 600; border-radius: 8px; padding: 6px; }
     .admin-panel { background: var(--admin-bg); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px dashed #94d2bd; }
-    .admin-input { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #94d2bd; font-size: 11pt; }
-    .btn-admin-active { background: var(--admin-purple); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .admin-input { flex: 1 1 auto; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 2px solid #94d2bd; font-size: 11pt; box-sizing: border-box; }
+    .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .config-card { background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8; box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; }
+    @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } }
+    .btn-admin-active { background: var(--admin-purple); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
     .btn-admin-inactive { background: white; color: var(--admin-purple); border: 2px solid var(--admin-purple); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 3px solid #ebfbfb; padding-bottom: 15px; }
     .tab { padding: 10px 25px; cursor: pointer; border-radius: 30px; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 2px solid #e2e8f0; transition: 0.3s; }
@@ -309,28 +312,28 @@
         </div>
 
         <div id="admin-page5" style="display:none;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
+          <div class="config-grid">
+            <div class="config-card">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">💻 設備 / 專科教室清單</h3>
-              <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <div style="display:flex; gap:8px; margin-bottom:15px; width:100%; align-items:stretch;">
                 <label for="newItemInput" style="display:none;">輸入新設備或教室名稱</label>
                 <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新設備或教室名稱..." aria-label="輸入新設備或教室名稱">
                 <button class="btn-admin-active" onclick="window.addItemConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
-              <div id="itemsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
+              <div id="itemsListContainer" style="display:flex; flex-direction:column; gap:8px; height:360px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
-            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
+            <div class="config-card">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">🏫 班級清單設定</h3>
-              <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <div style="display:flex; gap:8px; margin-bottom:15px; width:100%; align-items:stretch;">
                 <label for="newClassInput" style="display:none;">輸入新班級名稱</label>
                 <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新班級 (如: 401、科任)..." aria-label="輸入新班級名稱">
                 <button class="btn-admin-active" onclick="window.addClassConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
-              <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
+              <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; height:360px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
-            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8; grid-column: 1 / -1;">
+            <div class="config-card" style="grid-column: 1 / -1;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">⏱️ 節次與上下課時間設定</h3>
               <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
                 <label for="newPeriodName" style="display:none;">新節次名稱</label>
@@ -397,7 +400,7 @@
   import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // ▼ 請將 fallbackConfig 替換成你在 Firebase 複製的真實設定 ▼
-const firebaseConfig = {
+ const firebaseConfig = {
   apiKey: "AIzaSyCuFAxYwAA8yTN4WvonaR50CBxy48Cq3d8",
   authDomain: "equipment-86d63.firebaseapp.com",
   projectId: "equipment-86d63",
