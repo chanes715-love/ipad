@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>長安教學設備借用系統</title>
+  <title>教學設備與專科教室借用系統</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- 引入 SheetJS 來處理 Excel 匯入 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -275,7 +275,7 @@
       
       <div style="font-size: 10pt; color: #555; text-align: left; margin-bottom: 25px; line-height: 1.5; background: #e0fbfc; padding: 12px; border-radius: 10px; border: 2px dashed #caf0f8; font-weight: 600;">
         💡 請選擇您的姓名，並輸入密碼登入。<br>
-        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴)</span>
+        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴或 123456)</span>
       </div>
       
       <button id="btnLoginSubmit" class="btn-login" onclick="window.doLogin()">Login 登入</button>
@@ -289,7 +289,7 @@
     <div class="main-content">
       
       <div class="app-header">
-        <h1 class="app-title">Ipad Equipment 💻</h1>
+        <h1 class="app-title">Lab Equipment 💻</h1>
         <div class="header-user">
           <span id="displayUserName">使用者</span>
           <button class="btn-logout" onclick="window.doLogout(false)">登出</button>
@@ -420,7 +420,7 @@
           </div>
           <div style="font-size: 10pt; color: #78909c; margin-bottom: 10px; line-height: 1.5;">
              ※ 批次匯入 Excel 支援多種欄位名稱：<br>
-             系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 。<br>
+             系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 或預設為 123456。<br>
              若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
           </div>
           <div id="userTableContainer" style="overflow-x:auto;"></div>
@@ -498,7 +498,7 @@
   import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // === 🛑 在這裡貼上你的 Firebase 設定 🛑 ===
- const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyCuFAxYwAA8yTN4WvonaR50CBxy48Cq3d8",
   authDomain: "equipment-86d63.firebaseapp.com",
   projectId: "equipment-86d63",
@@ -583,6 +583,27 @@
   const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
   let chartInstance = null;
 
+  // === 閒置 5 分鐘自動登出機制 ===
+  let inactivityTimer = null;
+  const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5分鐘
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    const mainApp = document.getElementById('mainApp');
+    if (mainApp && mainApp.style.display === 'block') {
+      inactivityTimer = setTimeout(() => {
+        window.doLogout(true);
+      }, INACTIVITY_LIMIT_MS);
+    }
+  }
+
+  function setupActivityListeners() {
+    ['mousemove', 'mousedown', 'keypress', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+      window.addEventListener(evt, resetInactivityTimer, { passive: true });
+    });
+  }
+  setupActivityListeners();
+
   function getLocalTodayString() {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
@@ -632,18 +653,20 @@
     // 渲染下拉選單
     window.renderLoginDropdown();
 
-    const savedUser = localStorage.getItem('appAuthSession_FB_v3');
+    // 改用 sessionStorage：重新整理可維持登入，但關閉分頁或瀏覽器即視同登出
+    localStorage.removeItem('appAuthSession_FB_v3'); // 清除舊版永久快取
+    const savedUser = sessionStorage.getItem('appAuthSession_FB_v3');
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
       // 從資料庫最新名單重新驗證該使用者的真實權限，避免快取殘留管理員權限
       const dbUser = staticData.users.find(u => u.name === parsedUser.name || (u.account && u.account === parsedUser.account));
       if (dbUser) {
         parsedUser.isAdmin = dbUser.isAdmin === true || dbUser.isAdmin === 'true';
-        localStorage.setItem('appAuthSession_FB_v3', JSON.stringify(parsedUser));
+        sessionStorage.setItem('appAuthSession_FB_v3', JSON.stringify(parsedUser));
         staticData.userInfo = parsedUser;
         initSPA();
       } else {
-        localStorage.removeItem('appAuthSession_FB_v3');
+        sessionStorage.removeItem('appAuthSession_FB_v3');
         document.getElementById('loginOverlay').style.display = 'flex';
       }
     } else {
@@ -681,7 +704,7 @@
     if (userObj) {
         const isTrueAdmin = userObj.isAdmin === true || userObj.isAdmin === 'true';
         const authData = { name: userObj.name, account: userObj.account, email: userObj.email, isAdmin: isTrueAdmin };
-        localStorage.setItem('appAuthSession_FB_v3', JSON.stringify(authData));
+        sessionStorage.setItem('appAuthSession_FB_v3', JSON.stringify(authData));
         staticData.userInfo = authData;
         btn.innerText = "Login 登入"; btn.disabled = false;
         initSPA();
@@ -692,7 +715,10 @@
   };
 
   window.doLogout = function(isAutoLogout = false) {
+    sessionStorage.removeItem('appAuthSession_FB_v3');
     localStorage.removeItem('appAuthSession_FB_v3');
+    clearTimeout(inactivityTimer);
+
     // 清除管理員暫存與代理狀態
     originalAdminName = "";
     originalAdminAccount = "";
@@ -704,12 +730,13 @@
     document.getElementById('mainApp').style.display = 'none';
     document.getElementById('loginOverlay').style.display = 'flex';
     document.getElementById('loginPinInput').value = '';
-    if (isAutoLogout) showSystemAlert("⏱️ 您已閒置過久，系統已自動登出。");
+    if (isAutoLogout) showSystemAlert("⏱️ 您已閒置超過 5 分鐘，為保護帳號安全，系統已自動登出。");
   };
 
   function initSPA() {
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
+    resetInactivityTimer();
     
     // 重設代理狀態，確保登入時以本人身分開始
     spoofedUserName = "";
@@ -1043,9 +1070,12 @@
         itemsBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無設備項目</div>';
       } else {
         itemsBox.innerHTML = staticData.items.map((item, idx) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0;">
-            <span style="font-weight:bold; color:#333;">${item}</span>
-            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteItemConfig(${idx})">刪除</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
+            <span style="font-weight:bold; color:#333; word-break:break-all;">${item}</span>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editItemConfig(${idx})">修改</button>
+              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteItemConfig(${idx})">刪除</button>
+            </div>
           </div>
         `).join('');
       }
@@ -1057,13 +1087,112 @@
         classesBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無班級項目</div>';
       } else {
         classesBox.innerHTML = staticData.classes.map((cls, idx) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0;">
-            <span style="font-weight:bold; color:#333;">${cls}</span>
-            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteClassConfig(${idx})">刪除</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
+            <span style="font-weight:bold; color:#333; word-break:break-all;">${cls}</span>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editClassConfig(${idx})">修改</button>
+              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteClassConfig(${idx})">刪除</button>
+            </div>
           </div>
         `).join('');
       }
     }
+  };
+
+  window.editItemConfig = function(idx) {
+    const oldVal = staticData.items[idx];
+    document.getElementById('alertOverlay').style.display = 'block';
+    const modal = document.getElementById('customModal');
+    document.getElementById('customModalTitle').innerText = "✏️ 修改設備/教室名稱";
+    document.getElementById('customModalBody').innerHTML = `
+      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;">原名稱：<b>${oldVal}</b></div>
+      <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新名稱" aria-label="請輸入新設備或教室名稱">
+      <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#555; cursor:pointer; text-align:left; margin-bottom:10px;">
+        <input type="checkbox" id="syncHistoryRecords" checked> 同步更新已預約紀錄與禁借設定中的設備名稱
+      </label>
+    `;
+    const submitBtn = document.getElementById('customModalSubmit');
+    submitBtn.onclick = async function() {
+      const newVal = document.getElementById('editConfigInput').value.trim();
+      const syncHistory = document.getElementById('syncHistoryRecords').checked;
+      if (!newVal) { showSystemAlert("名稱不能為空！"); return; }
+      if (newVal === oldVal) { window.closeCustomModal(); return; }
+      if (staticData.items.some((item, i) => i !== idx && item === newVal)) {
+        showSystemAlert("⚠️ 該設備/教室名稱已存在！"); return;
+      }
+
+      submitBtn.innerText = "處理中...";
+      submitBtn.disabled = true;
+
+      try {
+        staticData.items[idx] = newVal;
+        await window.saveConfigListsToDB();
+
+        if (syncHistory) {
+          const bSnap = await getDocs(getPublicCol('bookings'));
+          const bPromises = [];
+          bSnap.docs.forEach(d => {
+            if (d.data().item === oldVal) {
+              bPromises.push(updateDoc(getPublicDoc('bookings', d.id), { item: newVal }));
+            }
+          });
+          const rSnap = await getDocs(getPublicCol('restrictions'));
+          rSnap.docs.forEach(d => {
+            if (d.data().item === oldVal) {
+              bPromises.push(updateDoc(getPublicDoc('restrictions', d.id), { item: newVal }));
+            }
+          });
+          if (bPromises.length > 0) await Promise.all(bPromises);
+        }
+
+        window.closeCustomModal();
+        window.renderConfigLists();
+        showSystemAlert(`✅ 已將「${oldVal}」修改為「${newVal}」！`);
+      } catch (err) {
+        showSystemAlert("修改失敗：" + err.message);
+      } finally {
+        submitBtn.innerText = "確定";
+        submitBtn.disabled = false;
+      }
+    };
+    modal.style.display = 'block';
+  };
+
+  window.editClassConfig = function(idx) {
+    const oldVal = staticData.classes[idx];
+    document.getElementById('alertOverlay').style.display = 'block';
+    const modal = document.getElementById('customModal');
+    document.getElementById('customModalTitle').innerText = "✏️ 修改班級名稱";
+    document.getElementById('customModalBody').innerHTML = `
+      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;">原班級：<b>${oldVal}</b></div>
+      <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新班級名稱" aria-label="請輸入新班級名稱">
+    `;
+    const submitBtn = document.getElementById('customModalSubmit');
+    submitBtn.onclick = async function() {
+      const newVal = document.getElementById('editConfigInput').value.trim();
+      if (!newVal) { showSystemAlert("班級名稱不能為空！"); return; }
+      if (newVal === oldVal) { window.closeCustomModal(); return; }
+      if (staticData.classes.some((cls, i) => i !== idx && cls === newVal)) {
+        showSystemAlert("⚠️ 該班級名稱已存在！"); return;
+      }
+
+      submitBtn.innerText = "處理中...";
+      submitBtn.disabled = true;
+
+      try {
+        staticData.classes[idx] = newVal;
+        await window.saveConfigListsToDB();
+        window.closeCustomModal();
+        window.renderConfigLists();
+        showSystemAlert(`✅ 已將班級「${oldVal}」修改為「${newVal}」！`);
+      } catch (err) {
+        showSystemAlert("修改失敗：" + err.message);
+      } finally {
+        submitBtn.innerText = "確定";
+        submitBtn.disabled = false;
+      }
+    };
+    modal.style.display = 'block';
   };
 
   window.addItemConfig = async function() {
