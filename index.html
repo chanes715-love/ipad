@@ -5,212 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>教學設備與專科教室借用系統</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- 引入 SheetJS 來處理 Excel 匯入 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    /* === 視覺風格變數設定 (天空藍 & 湖水綠) === */
     :root { 
-      --primary: #1282a2; /* 湖水綠主色 */
-      --primary-light: #034078; /* 深藍強調色 */
-      --bg: #e0fbfc; /* 天空淺藍背景 */
+      --primary: #1282a2;
+      --primary-light: #034078;
+      --bg: #e0fbfc;
       --container-bg: #ffffff;
       --text-dark: #0a1128;
       --success: #38b000; 
       --danger: #d90429; 
       --past: #ced4da; 
       --gray: #6c757d; 
-      --admin-purple: #006466; /* 管理員專屬深綠色 */
+      --admin-purple: #006466;
       --admin-bg: #ebfbfb;     
     }
-    
-    body { 
-      font-family: 'Nunito', 'Microsoft JhengHei', sans-serif; 
-      background-color: var(--bg); 
-      margin: 0; 
-      padding: 0; 
-      font-size: 11pt; 
-      color: #333; 
-      overflow-x: hidden;
-    }
-
+    body { font-family: 'Nunito', 'Microsoft JhengHei', sans-serif; background-color: var(--bg); margin: 0; padding: 0; font-size: 11pt; color: #333; overflow-x: hidden; }
     h1, h2, h3, .app-title { font-family: 'Fredoka', 'Microsoft JhengHei', sans-serif; color: var(--primary-light); }
-
-    /* 背景平板插圖設定 (靜止不晃動) */
-    .bg-illustration {
-      position: fixed;
-      opacity: 0.85;
-      z-index: 0;
-      pointer-events: none;
-    }
-    
-    .app-wrapper {
-      position: relative;
-      max-width: 1000px;
-      margin: 30px auto;
-      z-index: 10;
-      filter: drop-shadow(0 15px 30px rgba(18, 130, 162, 0.15)); 
-    }
-
-    /* 雲朵形狀的頂部 */
-    .wavy-top {
-      width: 100%;
-      height: 60px;
-      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path fill="%23ffffff" d="M0,40 Q60,0 120,40 T240,40 T360,40 T480,40 T600,40 T720,40 T840,40 T960,40 T1080,40 T1200,40 T1320,40 T1440,40 L1440,100 L0,100 Z"></path></svg>') no-repeat bottom;
-      background-size: 100% 60px;
-    }
-
-    /* 木紋形狀的底部 */
-    .wavy-bottom {
-      width: 100%;
-      height: 45px;
-      background-color: #e6ccb2; /* 木頭底色 */
-      background-image: repeating-linear-gradient(15deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px), repeating-linear-gradient(-15deg, transparent, transparent 15px, rgba(0,0,0,0.02) 15px, rgba(0,0,0,0.02) 30px);
-      border-bottom-left-radius: 12px;
-      border-bottom-right-radius: 12px;
-    }
-
-    .main-content {
-      background-color: var(--container-bg);
-      padding: 10px 40px 40px 40px;
-    }
-
-    @media (max-width: 768px) {
-      .app-wrapper { margin: 10px auto; }
-      .main-content { padding: 10px 20px 30px 20px; }
-      .bg-illustration { display: none; }
-    }
-
-    .app-header { 
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; 
-      margin-bottom: 25px; border-bottom: 3px dashed #caf0f8; padding-bottom: 15px;
-    }
-    .app-title { font-size: 2.2rem; margin: 0; color: var(--primary); letter-spacing: 1px; font-weight: bold;}
-    
-    .app-nav { display: flex; gap: 10px; flex-grow: 1; justify-content: center; overflow-x: auto; white-space: nowrap; margin-top: 10px;}
-    .nav-item { padding: 10px 20px; cursor: pointer; font-weight: 700; color: #777; background: #f8f9fa; border-radius: 30px; transition: 0.3s; font-size: 11pt; border: 2px solid transparent;}
+    .bg-illustration { position: fixed; opacity: 0.85; z-index: 0; pointer-events: none; }
+    .app-wrapper { position: relative; max-width: 1000px; margin: 30px auto; z-index: 10; filter: drop-shadow(0 15px 30px rgba(18, 130, 162, 0.15)); }
+    .wavy-top { width: 100%; height: 60px; background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path fill="%23ffffff" d="M0,40 Q60,0 120,40 T240,40 T360,40 T480,40 T600,40 T720,40 T840,40 T960,40 T1080,40 T1200,40 T1320,40 T1440,40 L1440,100 L0,100 Z"></path></svg>') no-repeat bottom; background-size: 100% 60px; }
+    .wavy-bottom { width: 100%; height: 45px; background-color: #e6ccb2; background-image: repeating-linear-gradient(15deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px), repeating-linear-gradient(-15deg, transparent, transparent 15px, rgba(0,0,0,0.02) 15px, rgba(0,0,0,0.02) 30px); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+    .main-content { background-color: var(--container-bg); padding: 10px 40px 40px 40px; }
+    @media (max-width: 768px) { .app-wrapper { margin: 10px auto; } .main-content { padding: 10px 20px 30px 20px; } .bg-illustration { display: none; } }
+    .app-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 25px; border-bottom: 3px dashed #caf0f8; padding-bottom: 15px; }
+    .app-title { font-size: 2.2rem; margin: 0; color: var(--primary); letter-spacing: 1px; font-weight: bold; }
+    .app-nav { display: flex; gap: 10px; flex-grow: 1; justify-content: center; overflow-x: auto; white-space: nowrap; margin-top: 10px; }
+    .nav-item { padding: 10px 20px; cursor: pointer; font-weight: 700; color: #777; background: #f8f9fa; border-radius: 30px; transition: 0.3s; font-size: 11pt; border: 2px solid transparent; }
     .nav-item:hover { background: #e0fbfc; transform: translateY(-2px); }
     .nav-item.active { background: var(--primary); color: white; border-color: var(--primary-light); box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); }
     .nav-item.admin-nav { background: #f5f5f5; color: var(--admin-purple); display: none; }
     .nav-item.admin-nav.active { background: var(--admin-purple); color: white; border-color: var(--admin-purple); }
-
-    .header-user { font-size: 11pt; color: #fff; background: var(--primary-light); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 10px; font-weight: 700;}
-    .btn-logout { background: #ffccd5; border: 1px solid #ffb3c1; color: #c9184a; font-weight: bold; cursor: pointer; padding: 4px 10px; border-radius: 15px; font-size: 10pt; transition: 0.2s;}
+    .header-user { font-size: 11pt; color: #fff; background: var(--primary-light); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .btn-logout { background: #ffccd5; border: 1px solid #ffb3c1; color: #c9184a; font-weight: bold; cursor: pointer; padding: 4px 10px; border-radius: 15px; font-size: 10pt; transition: 0.2s; }
     .btn-logout:hover { background: #ffb3c1; }
-
     .view-section { display: none; animation: fadeIn 0.4s ease; }
     .view-section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
     .booking-controls { display:grid; grid-template-columns: 1fr 1fr; gap:15px; background: #f1fafa; padding:20px; border-radius:15px; margin-bottom:20px; border: 2px solid #caf0f8; }
     .booking-controls label { font-weight: 700; color: var(--primary); font-size: 11pt; }
     .booking-controls input, .booking-controls select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #caf0f8; margin-top: 8px; box-sizing: border-box; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 11pt; color: var(--primary); }
-    
     .locked-input { opacity: 0.7; cursor: not-allowed !important; background-color: #f8f9fa !important; }
     .proxy-alert { display:none; background: #fff9c4; color:#f57f17; padding:15px; border-radius:12px; margin-bottom:20px; font-weight:bold; align-items: center; gap: 10px; border: 2px dashed #fbc02d; }
-    
     .daily-board { background: #f1f8e9; border: 2px dashed #aed581; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
     .daily-board h3 { margin: 0 0 15px 0; color: #558b2f; font-size: 13pt; }
     .daily-tags { display: flex; flex-wrap: wrap; gap: 8px; }
     .daily-tag { background: white; border: 2px solid #8bc34a; color: #33691e; padding: 6px 12px; border-radius: 20px; font-size: 10pt; font-weight: bold; }
-
     table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; table-layout: fixed; background: white; border-radius: 12px; overflow: hidden; border: 2px solid #caf0f8; }
     th, td { padding: 15px 8px; text-align: center; border-bottom: 1px solid #e0fbfc; border-right: 1px solid #e0fbfc; }
     th { background: #f1fafa; color: var(--primary); line-height: 1.4; font-weight: 700; font-size: 12pt; border-bottom: 2px solid #caf0f8; } 
     th:last-child, td:last-child { border-right: none; }
     tr:last-child td { border-bottom: none; }
-
     .skeleton { background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); background-size: 200% 100%; animation: 1.5s shine linear infinite; border-radius:8px; height: 35px; }
     @keyframes shine { to { background-position-x: -200%; } }
-    
     .btn-book { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; width: 90%; font-weight: bold; transition: 0.2s; }
     .btn-book:hover { transform: translateY(-2px); filter: brightness(1.1); }
     .cell-mine { color: white; font-weight: bold; background: var(--primary); padding: 6px; border: 2px solid var(--primary-light); width: 90%; display:inline-block; border-radius: 8px; }
     .cell-booked { color: #fff; font-weight: bold; background: var(--danger); padding: 6px; width: 90%; display:inline-block; border-radius: 8px; }
-    .cell-past { background: var(--past); color: #555; border-radius: 8px; padding: 6px; display: inline-block; width: 90%; font-weight: 600;}
+    .cell-past { background: var(--past); color: #555; border-radius: 8px; padding: 6px; display: inline-block; width: 90%; font-weight: 600; }
     .cell-restricted { color: #888; font-size: 10pt; background: #f8f9fa; font-weight: 600; border-radius: 8px; padding: 6px; }
-
     .admin-panel { background: var(--admin-bg); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px dashed #94d2bd; }
     .admin-input { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #94d2bd; font-size: 11pt; }
     .btn-admin-active { background: var(--admin-purple); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     .btn-admin-inactive { background: white; color: var(--admin-purple); border: 2px solid var(--admin-purple); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
     .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 3px solid #ebfbfb; padding-bottom: 15px; }
     .tab { padding: 10px 25px; cursor: pointer; border-radius: 30px; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 2px solid #e2e8f0; transition: 0.3s; }
     .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-    
-    .card { border-left: 8px solid var(--primary); background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0fbfc;}
+    .card { border-left: 8px solid var(--primary); background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0fbfc; }
     .card.past { border-left-color: var(--gray); background: #f8fafc; }
     .card.cancelled { border-left-color: var(--danger); background: #fff5f5; }
     .btn-cancel { background: white; color: var(--danger); border: 2px solid var(--danger); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .btn-cancel:hover { background: var(--danger); color: white; }
     .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 10pt; font-weight: bold; display: inline-block; }
     .status-cancelled { background: #ffebee; color: var(--danger); border: 1px solid #ffccd5; }
-    
-    #initialLoader {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--bg);
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
-    .loader-box {
-      background: white;
-      padding: 35px 45px;
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(18, 130, 162, 0.18);
-      text-align: center;
-      border-top: 8px solid var(--primary);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-    }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #caf0f8;
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    #initialLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease, visibility 0.4s ease; }
+    .loader-box { background: white; padding: 35px 45px; border-radius: 20px; box-shadow: 0 15px 40px rgba(18, 130, 162, 0.18); text-align: center; border-top: 8px solid var(--primary); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+    .spinner { width: 50px; height: 50px; border: 5px solid #caf0f8; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text {
-      font-size: 13pt;
-      font-weight: bold;
-      color: var(--primary-light);
-      letter-spacing: 1px;
-    }
-    .loader-subtext {
-      font-size: 10pt;
-      color: #6c757d;
-    }
-
+    .loader-text { font-size: 13pt; font-weight: bold; color: var(--primary-light); letter-spacing: 1px; }
+    .loader-subtext { font-size: 10pt; color: #6c757d; }
     #loginOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9998; align-items:center; justify-content:center; }
     .login-wrapper { position: relative; width: 350px; max-width: 90%; }
-    .login-box { background: var(--container-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(18, 130, 162, 0.2); text-align: center; position: relative; z-index: 10; border-top: 8px solid var(--primary);}
+    .login-box { background: var(--container-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(18, 130, 162, 0.2); text-align: center; position: relative; z-index: 10; border-top: 8px solid var(--primary); }
     .login-box h2 { color: var(--primary); margin-top: 0; margin-bottom: 25px; font-size: 1.8rem; }
-    .login-input { width: 100%; padding: 14px; border: 2px solid #caf0f8; border-radius: 10px; box-sizing: border-box; font-size: 11pt; font-family: 'Nunito', sans-serif; font-weight: 600; color: var(--text-dark);}
+    .login-input { width: 100%; padding: 14px; border: 2px solid #caf0f8; border-radius: 10px; box-sizing: border-box; font-size: 11pt; font-family: 'Nunito', sans-serif; font-weight: 600; color: var(--text-dark); }
     .login-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(18, 130, 162, 0.2); }
-    .btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 13pt; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); letter-spacing: 1px;}
+    .btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 13pt; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); letter-spacing: 1px; }
     .btn-login:hover { background: var(--primary-light); transform: translateY(-2px); }
-
     #alertOverlay, #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100000 !important; backdrop-filter: blur(3px); }
-    #alertModal, #modal, #customModal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:20px; z-index:100001 !important; width:320px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; border-top: 8px solid var(--danger);}
+    #alertModal, #modal, #customModal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:20px; z-index:100001 !important; width:320px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; border-top: 8px solid var(--danger); }
     #modal { border-top-color: var(--primary); }
     #customModal { border-top-color: var(--admin-purple); }
     #alertMessage { font-size: 12pt; font-weight: 700; color: #333; line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
-    .btn-alert { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; font-size: 12pt; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3);}
+    .btn-alert { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; font-size: 12pt; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); }
     .confirm-btns { display: flex; gap: 15px; margin-top: 20px; }
-    .btn-cancel-modal, .btn-confirm-modal { padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; flex: 1; transition: 0.2s; border: none; font-size: 11pt;}
+    .btn-cancel-modal, .btn-confirm-modal { padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; flex: 1; transition: 0.2s; border: none; font-size: 11pt; }
     .btn-cancel-modal { background: #f1f5f9; color: #64748b; }
     .btn-confirm-modal { background: var(--danger); color: white; box-shadow: 0 4px 10px rgba(217, 4, 41, 0.3); }
     .modal-input { width: 100%; box-sizing: border-box; padding: 12px; margin-top: 8px; margin-bottom: 20px; border: 2px solid #caf0f8; border-radius: 8px; font-size: 11pt; font-weight: 600; color: var(--primary); }
     .modal-input-admin { border-color: #94d2bd; color: var(--admin-purple); }
-
     .admin-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; overflow-x: auto; white-space: nowrap; }
     .admin-tab { padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: bold; background: #ebfbfb; color: var(--admin-purple); transition: 0.2s; }
     .admin-tab.active { background: var(--admin-purple); color: white; }
@@ -220,7 +113,6 @@
     .key-btn.active-unlent { background: var(--gray); color: white; border-color: var(--gray); }
     .key-btn.active-lent { background: var(--danger); color: white; border-color: var(--danger); }
     .key-btn.active-returned { background: var(--success); color: white; border-color: var(--success); }
-    
     .form-row { margin-bottom: 18px; text-align: left; }
     .form-row label.title { display: block; font-weight: bold; margin-bottom: 8px; color: #444; font-size: 11pt; }
     .form-row input[type="date"], .form-row input[type="text"], .form-row select { width: 100%; padding: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 11pt; }
@@ -232,7 +124,6 @@
 </head>
 <body>
 
-<!-- 網頁初始載入等待畫面 -->
 <div id="initialLoader">
   <div class="loader-box">
     <div class="spinner"></div>
@@ -241,43 +132,36 @@
   </div>
 </div>
 
-<!-- 1. 極簡風直式平板 -->
 <div class="bg-illustration" style="top: 8%; left: 5%; width: 110px; height: 150px;">
   <svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="10" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><rect x="40" y="40" width="40" height="40" rx="8" fill="#38b2ac" opacity="0.8"/><rect x="40" y="90" width="40" height="10" rx="4" fill="#a0aec0" opacity="0.6"/><circle cx="60" cy="148" r="4" fill="#cbd5e0"/></svg>
 </div>
-<!-- 2. 橫式白底滿版App平板 -->
 <div class="bg-illustration" style="top: 15%; right: 8%; width: 150px; height: 110px; transform: rotate(15deg);">
   <svg viewBox="0 0 160 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="140" height="100" rx="8" fill="#f1f5f9"/><rect x="15" y="15" width="130" height="90" fill="#0077b6"/><rect x="25" y="25" width="15" height="15" rx="3" fill="#ffffff"/><rect x="50" y="25" width="15" height="15" rx="3" fill="#ff4d6d"/><rect x="75" y="25" width="15" height="15" rx="3" fill="#06d6a0"/><rect x="100" y="25" width="15" height="15" rx="3" fill="#ffd166"/><line x1="10" y1="60" x2="15" y2="60" stroke="#94a3b8" stroke-width="2"/></svg>
 </div>
-<!-- 3. 藍邊帶觸控筆的平板 -->
 <div class="bg-illustration" style="bottom: 12%; left: 8%; width: 140px; height: 140px; transform: rotate(-10deg);">
   <svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/><ellipse cx="123" cy="36" rx="4" ry="6" fill="#023e8a" transform="rotate(35 123 36)"/></svg>
 </div>
-<!-- 4. 附帶支架的橫放平板 -->
 <div class="bg-illustration" style="bottom: 18%; right: 6%; width: 150px; height: 110px;">
   <svg viewBox="0 0 160 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><polygon points="10,110 30,30 150,30 130,110" fill="#03045e"/><rect x="25" y="35" width="115" height="70" rx="3" fill="#fca311" transform="skewX(-14)"/><rect x="50" y="45" width="60" height="40" rx="2" fill="#ffffff" transform="skewX(-14)"/><path d="M 60 70 Q 75 45 90 70 T 110 50" fill="none" stroke="#14213d" stroke-width="3" stroke-linecap="round" transform="skewX(-14)"/><line x1="140" y1="20" x2="105" y2="75" stroke="#e5e5e5" stroke-width="5" stroke-linecap="round"/><rect x="35" y="90" width="8" height="8" rx="2" fill="#00b4d8" transform="skewX(-14)"/><rect x="48" y="90" width="8" height="8" rx="2" fill="#ef233c" transform="skewX(-14)"/><rect x="61" y="90" width="8" height="8" rx="2" fill="#ffb703" transform="skewX(-14)"/></svg>
 </div>
 
 <div id="loginOverlay">
-  <!-- 登入畫面的靜態平板 -->
   <div class="bg-illustration" style="top: 10%; left: 10%; width: 150px; height: 150px;"><svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/></svg></div>
   <div class="bg-illustration" style="bottom: 15%; right: 10%; width: 140px; height: 140px; transform: rotate(-20deg);"><svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="8" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><circle cx="60" cy="70" r="30" fill="#38b2ac" opacity="0.6"/><circle cx="80" cy="90" r="25" fill="#ed8936" opacity="0.6"/><circle cx="40" cy="100" r="20" fill="#ecc94b" opacity="0.6"/></svg></div>
 
   <div class="login-wrapper">
     <div class="login-box">
       <h2>設備預約登入</h2>
-      
+      <label for="loginNameSelect" style="display:none;">選擇您的姓名</label>
       <select id="loginNameSelect" class="login-input" style="margin-bottom: 15px;" aria-label="選擇您的姓名" autocomplete="username">
         <option value="">載入名單中...</option>
       </select>
-      
+      <label for="loginPinInput" style="display:none;">請輸入密碼</label>
       <input type="password" id="loginPinInput" class="login-input" placeholder="請輸入密碼" style="margin-bottom: 10px;" aria-label="請輸入密碼" autocomplete="current-password">
-      
       <div style="font-size: 10pt; color: #555; text-align: left; margin-bottom: 25px; line-height: 1.5; background: #e0fbfc; padding: 12px; border-radius: 10px; border: 2px dashed #caf0f8; font-weight: 600;">
         💡 請選擇您的姓名，並輸入密碼登入。<br>
         <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴或 123456)</span>
       </div>
-      
       <button id="btnLoginSubmit" class="btn-login" onclick="window.doLogin()">Login 登入</button>
     </div>
   </div>
@@ -287,7 +171,6 @@
   <div class="app-wrapper">
     <div class="wavy-top"></div>
     <div class="main-content">
-      
       <div class="app-header">
         <h1 class="app-title">Lab Equipment 💻</h1>
         <div class="header-user">
@@ -310,6 +193,7 @@
         <div id="adminPanel" class="admin-panel" style="display:none;">
           <h3>👨‍💻 代客預約 / 身分切換</h3>
           <div class="admin-controls" style="display:flex; gap:10px;">
+            <label for="adminSwitchName" style="display:none;">選擇要切換代理的使用者</label>
             <select id="adminSwitchName" class="admin-input" aria-label="選擇要切換代理的使用者"></select>
             <button id="btnSwitch" class="btn-admin-active" onclick="window.switchUserProxy()">切換</button>
             <button id="btnReset" class="btn-admin-inactive" onclick="window.resetUserProxy()">還原本人</button>
@@ -355,7 +239,6 @@
           <div id="admin-t5" class="admin-tab" onclick="window.switchAdminTab(5)">🛠️ 設備、班級與節次設定</div>
         </div>
 
-        <!-- 每日狀態 -->
         <div id="admin-page1">
           <div style="background:#e0fbfc; padding:20px; border-radius:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
             <label for="adminDate" style="font-weight:bold;">📅 查看日期</label>
@@ -364,16 +247,19 @@
           <div id="adminDailyList"></div>
         </div>
 
-        <!-- 禁借設定 -->
         <div id="admin-page2" style="display:none;">
           <div class="form-row">
             <label class="title" for="resItem">🚫 選擇禁借設備/教室</label>
             <select id="resItem" class="admin-input"></select>
           </div>
           <div class="form-row">
-            <label class="title" for="resStartDate">📅 影響日期範圍</label>
-            <div class="date-group">
-              <input type="date" id="resStartDate" class="admin-input" aria-label="禁借開始日期"> <span style="font-weight:bold; color:#777;">至</span> <input type="date" id="resEndDate" class="admin-input" aria-label="禁借結束日期">
+            <div class="title" id="resDateGroupLabel">📅 影響日期範圍</div>
+            <div class="date-group" aria-labelledby="resDateGroupLabel">
+              <label for="resStartDate" style="display:none;">禁借開始日期</label>
+              <input type="date" id="resStartDate" class="admin-input" aria-label="禁借開始日期"> 
+              <span style="font-weight:bold; color:#777;">至</span> 
+              <label for="resEndDate" style="display:none;">禁借結束日期</label>
+              <input type="date" id="resEndDate" class="admin-input" aria-label="禁借結束日期">
             </div>
           </div>
           <div class="form-row">
@@ -399,14 +285,12 @@
           <button id="resSubmitBtn" class="btn-submit" onclick="window.submitRestrict()">確認並寫入設定</button>
         </div>
 
-        <!-- 統計圖表 -->
         <div id="admin-page3" style="display:none;">
           <div style="position: relative; height: 350px; width: 100%; background:white; padding:20px; border-radius:10px; border: 1px solid #94d2bd;">
             <canvas id="myChart"></canvas>
           </div>
         </div>
 
-        <!-- 帳號管理 -->
         <div id="admin-page4" style="display:none;">
           <div style="margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px dashed #d4a373;">
             <button onclick="window.promptChangeAdminPassword()" class="btn-admin-inactive" style="border-color: #d4a373; color: #d35400;">🔑 修改我的登入密碼</button>
@@ -419,58 +303,53 @@
              </label>
           </div>
           <div style="font-size: 10pt; color: #78909c; margin-bottom: 10px; line-height: 1.5;">
-             ※ 批次匯入 Excel 支援多種欄位名稱：<br>
-             系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 或預設為 123456。<br>
-             若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
+             ※ 批次匯入 Excel 支援多種欄位名稱：系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 或預設為 123456。若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
           </div>
           <div id="userTableContainer" style="overflow-x:auto;"></div>
         </div>
 
-        <!-- 設備與班級設定 -->
         <div id="admin-page5" style="display:none;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-            
-            <!-- 設備/教室管理 -->
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">💻 設備 / 專科教室清單</h3>
               <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <label for="newItemInput" style="display:none;">輸入新設備或教室名稱</label>
                 <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新設備或教室名稱..." aria-label="輸入新設備或教室名稱">
                 <button class="btn-admin-active" onclick="window.addItemConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="itemsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
-            <!-- 班級清單管理 -->
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">🏫 班級清單設定</h3>
               <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <label for="newClassInput" style="display:none;">輸入新班級名稱</label>
                 <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新班級 (如: 401、科任)..." aria-label="輸入新班級名稱">
                 <button class="btn-admin-active" onclick="window.addClassConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
-            <!-- 節次與時間管理 -->
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8; grid-column: 1 / -1;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">⏱️ 節次與上下課時間設定</h3>
               <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+                <label for="newPeriodName" style="display:none;">新節次名稱</label>
                 <input type="text" id="newPeriodName" class="admin-input" placeholder="節次名稱 (如: 早自習、第八節)" style="flex: 1 1 160px;" aria-label="新節次名稱">
                 <div style="display:flex; align-items:center; gap:6px; flex: 1 1 240px;">
-                  <label for="newPeriodStart" style="font-weight:bold; color:#555; font-size:10pt; white-space:nowrap;">時間：</label>
+                  <span style="font-weight:bold; color:#555; font-size:10pt; white-space:nowrap;">時間：</span>
+                  <label for="newPeriodStart" style="display:none;">開始時間</label>
                   <input type="time" id="newPeriodStart" class="admin-input" value="08:10" style="padding:9px;" aria-label="開始時間">
                   <span style="font-weight:bold; color:#777;">至</span>
+                  <label for="newPeriodEnd" style="display:none;">結束時間</label>
                   <input type="time" id="newPeriodEnd" class="admin-input" value="09:00" style="padding:9px;" aria-label="結束時間">
                 </div>
                 <button class="btn-admin-active" onclick="window.addPeriodConfig()" style="white-space:nowrap;">➕ 新增節次</button>
               </div>
               <div id="periodsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; padding-right:4px;"></div>
             </div>
-
           </div>
         </div>
-
       </div>
-
     </div>
     <div class="wavy-bottom"></div>
   </div>
@@ -486,19 +365,23 @@
   <select id="purposeType" class="modal-input" onchange="window.togglePurpose()">
     <option value="class">班級使用</option><option value="other">其他用途</option>
   </select>
-  <div id="classDiv"><select id="classSelect" class="modal-input" aria-label="選擇使用班級"></select></div>
-  <div id="otherDiv" style="display:none;"><input type="text" id="otherPurpose" class="modal-input" placeholder="請輸入用途" aria-label="請輸入其他用途"></div>
+  <div id="classDiv">
+    <label for="classSelect" style="display:none;">選擇使用班級</label>
+    <select id="classSelect" class="modal-input" aria-label="選擇使用班級"></select>
+  </div>
+  <div id="otherDiv" style="display:none;">
+    <label for="otherPurpose" style="display:none;">請輸入其他用途</label>
+    <input type="text" id="otherPurpose" class="modal-input" placeholder="請輸入用途" aria-label="請輸入其他用途">
+  </div>
   <button onclick="window.submitBooking()" style="width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold; font-size:12pt; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.4);">送出預約</button>
 </div>
 
-<!-- 系統警告視窗 -->
 <div id="alertOverlay"></div>
 <div id="alertModal">
   <div id="alertMessage"></div>
   <div id="alertBtns"></div>
 </div>
 
-<!-- 客製化輸入 Modal (新增帳號/改密碼) -->
 <div id="customModal">
   <h3 id="customModalTitle" style="color:var(--admin-purple); margin-top:0;"></h3>
   <div id="customModalBody"></div>
@@ -513,8 +396,8 @@
   import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // === 🛑 在這裡貼上你的 Firebase 設定 🛑 ===
- const firebaseConfig = {
+  // ▼ 請將 fallbackConfig 替換成你在 Firebase 複製的真實設定 ▼
+const firebaseConfig = {
   apiKey: "AIzaSyCuFAxYwAA8yTN4WvonaR50CBxy48Cq3d8",
   authDomain: "equipment-86d63.firebaseapp.com",
   projectId: "equipment-86d63",
@@ -559,7 +442,7 @@
       console.error("Firebase 初始化失敗:", error);
       hideInitialLoader();
       document.getElementById('loginOverlay').style.display = 'flex';
-      showSystemAlert("⚠️ 無法連接到資料庫。請確認 Firebase Config 設定正確。");
+      showSystemAlert("⚠️ Firebase 連線失敗。\n請確認 Firebase Config 的 API Key 是否正確。");
     }
   }
 
@@ -571,8 +454,8 @@
       const defaultData = {
         users: [
           { email: "admin@demo.com", account: "admin", name: "管理員", pin: "admin", isAdmin: true },
-          { email: "teacher1@demo.com", account: "teacher1", name: "王老師", pin: "teacher1", isAdmin: false },
-          { email: "teacher2@demo.com", account: "teacher2", name: "李老師", pin: "teacher2", isAdmin: false }
+          { email: "teacher1@demo.com", account: "teacher1", name: "王老師", pin: "123456", isAdmin: false },
+          { email: "teacher2@demo.com", account: "teacher2", name: "李老師", pin: "123456", isAdmin: false }
         ],
         items: ["iPad平板車-A", "iPad平板車-B", "筆電推車-A", "自然專科教室一", "音樂教室"],
         periods: [
@@ -590,7 +473,6 @@
     }
   }
 
-  // ================= 前端全域狀態 =================
   let staticData = { items: [], classes: [], periods: [], users: [], userInfo: null };
   let originalAdminName = ""; 
   let originalAdminAccount = "";
@@ -599,26 +481,20 @@
   const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
   let chartInstance = null;
 
-  // === 閒置 5 分鐘自動登出機制 ===
   let inactivityTimer = null;
-  const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5分鐘
+  const INACTIVITY_LIMIT_MS = 5 * 60 * 1000;
 
   function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     const mainApp = document.getElementById('mainApp');
     if (mainApp && mainApp.style.display === 'block') {
-      inactivityTimer = setTimeout(() => {
-        window.doLogout(true);
-      }, INACTIVITY_LIMIT_MS);
+      inactivityTimer = setTimeout(() => { window.doLogout(true); }, INACTIVITY_LIMIT_MS);
     }
   }
 
-  function setupActivityListeners() {
-    ['mousemove', 'mousedown', 'keypress', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
-      window.addEventListener(evt, resetInactivityTimer, { passive: true });
-    });
-  }
-  setupActivityListeners();
+  ['mousemove', 'mousedown', 'keypress', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
 
   function formatLocalDate(d) {
     const year = d.getFullYear();
@@ -627,11 +503,8 @@
     return `${year}-${month}-${day}`;
   }
 
-  function getLocalTodayString() {
-    return formatLocalDate(new Date());
-  }
+  function getLocalTodayString() { return formatLocalDate(new Date()); }
 
-  // ================= 彈出視窗工具 =================
   let confirmCallback = null;
   function showSystemConfirm(msg, callback) {
     document.getElementById('alertMessage').innerText = msg;
@@ -653,7 +526,7 @@
   window.closeCustomModal = function() {
     document.getElementById('alertOverlay').style.display = 'none';
     document.getElementById('customModal').style.display = 'none';
-  }
+  };
 
   async function initializeAppFrontend() {
     const today = getLocalTodayString();
@@ -671,15 +544,11 @@
       staticData.classes = data.classes || [];
     }
     
-    // 渲染下拉選單
     window.renderLoginDropdown();
-
-    // 改用 sessionStorage：重新整理可維持登入，但關閉分頁或瀏覽器即視同登出
-    localStorage.removeItem('appAuthSession_FB_v3'); // 清除舊版永久快取
+    localStorage.removeItem('appAuthSession_FB_v3'); 
     const savedUser = sessionStorage.getItem('appAuthSession_FB_v3');
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
-      // 從資料庫最新名單重新驗證該使用者的真實權限，避免快取殘留管理員權限
       const dbUser = staticData.users.find(u => u.name === parsedUser.name || (u.account && u.account === parsedUser.account));
       if (dbUser) {
         parsedUser.isAdmin = dbUser.isAdmin === true || dbUser.isAdmin === 'true';
@@ -695,59 +564,45 @@
     }
   }
 
-  // 渲染登入的下拉選單
   window.renderLoginDropdown = function() {
-      const sel = document.getElementById('loginNameSelect');
-      if (!sel) return;
-      const currentVal = sel.value;
-      
-      // 確保下拉選單有管理員與所有老師
-      const options = staticData.users.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
-      sel.innerHTML = '<option value="">-- 請選擇您的姓名 --</option>' + options;
-      
-      if(currentVal && staticData.users.find(u => u.name === currentVal)) {
-          sel.value = currentVal;
-      }
+    const sel = document.getElementById('loginNameSelect');
+    if (!sel) return;
+    const currentVal = sel.value;
+    const options = staticData.users.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+    sel.innerHTML = '<option value="">-- 請選擇您的姓名 --</option>' + options;
+    if(currentVal && staticData.users.find(u => u.name === currentVal)) sel.value = currentVal;
   };
 
   window.doLogin = function() {
     const selectedName = document.getElementById('loginNameSelect').value;
     const pin = document.getElementById('loginPinInput').value.trim();
-    
     if(!selectedName || !pin) { showSystemAlert("請選擇姓名並輸入密碼！"); return; }
-    
     const btn = document.getElementById('btnLoginSubmit');
     btn.innerText = "驗證中..."; btn.disabled = true;
 
-    // 比對選擇的名字與密碼
     const userObj = staticData.users.find(u => u.name === selectedName && String(u.pin) === String(pin));
-    
     if (userObj) {
-        const isTrueAdmin = userObj.isAdmin === true || userObj.isAdmin === 'true';
-        const authData = { name: userObj.name, account: userObj.account, email: userObj.email, isAdmin: isTrueAdmin };
-        sessionStorage.setItem('appAuthSession_FB_v3', JSON.stringify(authData));
-        staticData.userInfo = authData;
-        btn.innerText = "Login 登入"; btn.disabled = false;
-        initSPA();
+      const isTrueAdmin = userObj.isAdmin === true || userObj.isAdmin === 'true';
+      const authData = { name: userObj.name, account: userObj.account, email: userObj.email, isAdmin: isTrueAdmin };
+      sessionStorage.setItem('appAuthSession_FB_v3', JSON.stringify(authData));
+      staticData.userInfo = authData;
+      btn.innerText = "Login 登入"; btn.disabled = false;
+      initSPA();
     } else {
-        showSystemAlert("❌ 密碼錯誤！請確認後再試。");
-        btn.innerText = "Login 登入"; btn.disabled = false;
+      showSystemAlert("❌ 密碼錯誤！請確認後再試。");
+      btn.innerText = "Login 登入"; btn.disabled = false;
     }
   };
 
   window.doLogout = function(isAutoLogout = false) {
     sessionStorage.removeItem('appAuthSession_FB_v3');
-    localStorage.removeItem('appAuthSession_FB_v3');
     clearTimeout(inactivityTimer);
-
-    // 清除管理員暫存與代理狀態
     originalAdminName = "";
     originalAdminAccount = "";
     spoofedUserName = "";
     document.getElementById('proxyAlert').style.display = 'none';
     document.getElementById('nav-admin').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
-
     document.getElementById('mainApp').style.display = 'none';
     document.getElementById('loginOverlay').style.display = 'flex';
     document.getElementById('loginPinInput').value = '';
@@ -758,11 +613,8 @@
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     resetInactivityTimer();
-    
-    // 重設代理狀態，確保登入時以本人身分開始
     spoofedUserName = "";
     document.getElementById('proxyAlert').style.display = 'none';
-
     document.getElementById('displayUserName').innerText = staticData.userInfo.name;
     document.getElementById('userName').value = staticData.userInfo.name;
     
@@ -776,9 +628,7 @@
       document.getElementById('nav-admin').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'none';
     }
-
     initDropdowns();
-    // 每次登入預設強制切換回「我要預約」首頁，防止停留在上一個使用者的管理後台畫面
     window.switchAppView('booking');
   }
 
@@ -788,9 +638,7 @@
     const itemsHtml = staticData.items.map(i => `<option value="${i}">${i}</option>`).join('');
     itemSel.innerHTML = itemsHtml;
     if(resItem) resItem.innerHTML = itemsHtml;
-    
-    const classSel = document.getElementById('classSelect');
-    classSel.innerHTML = staticData.classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    document.getElementById('classSelect').innerHTML = staticData.classes.map(c => `<option value="${c}">${c}</option>`).join('');
     
     const adminSwitchSel = document.getElementById('adminSwitchName');
     adminSwitchSel.innerHTML = staticData.users.map(u => `<option value="${u.account}">${u.name}</option>`).join('');
@@ -806,7 +654,6 @@
       showSystemAlert("⛔ 權限不足！只有系統管理員可以進入管理後台。");
       return;
     }
-
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     document.getElementById('nav-' + viewId).classList.add('active');
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -818,7 +665,8 @@
   };
 
   function toggleLoadingState(isLoading) {
-    const dateInput = document.getElementById('targetDate'); const itemInput = document.getElementById('itemSelect');
+    const dateInput = document.getElementById('targetDate');
+    const itemInput = document.getElementById('itemSelect');
     dateInput.disabled = isLoading; itemInput.disabled = isLoading;
     if(isLoading) { dateInput.classList.add('locked-input'); itemInput.classList.add('locked-input'); } 
     else { dateInput.classList.remove('locked-input'); itemInput.classList.remove('locked-input'); }
@@ -832,41 +680,39 @@
     document.getElementById('syncTag').innerText = "(同步中...)";
     toggleLoadingState(true); 
     
-    let h = `<table><tr><th style="width:100px;">節次</th>${'<th>讀取中</th>'.repeat(5)}</tr>`;
-    staticData.periods.forEach(p => { h += `<tr><td style="font-weight:bold;">${p.name}</td>${'<td><div class="skeleton"></div></td>'.repeat(5)}</tr>`; });
+    let h = `<table><tr><th style="width:115px;">節次</th>${'<th>讀取中</th>'.repeat(7)}</tr>`;
+    staticData.periods.forEach(p => { h += `<tr><td style="font-weight:bold;">${p.name}</td>${'<td><div class="skeleton"></div></td>'.repeat(7)}</tr>`; });
     document.getElementById('tableBox').innerHTML = h + "</table>";
     document.getElementById('dailyBoard').style.display = 'none';
 
     try {
-        const bookingsSnap = await getDocs(getPublicCol('bookings'));
-        const allBookings = bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}));
-        
-        const restrictionsSnap = await getDocs(getPublicCol('restrictions'));
-        const allRestrictions = restrictionsSnap.docs.map(d => ({id: d.id, ...d.data()}));
+      const bookingsSnap = await getDocs(getPublicCol('bookings'));
+      const allBookings = bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}));
+      const restrictionsSnap = await getDocs(getPublicCol('restrictions'));
+      const allRestrictions = restrictionsSnap.docs.map(d => ({id: d.id, ...d.data()}));
 
-        const parts = targetDate.split('-').map(Number);
-        const baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
-        const dayOfWeek = baseDate.getDay(); 
-        const weekDates = [];
-        for(let i = 0; i <= 6; i++) {
-            let d = new Date(baseDate);
-            d.setDate(baseDate.getDate() - dayOfWeek + i);
-            weekDates.push(formatLocalDate(d));
-        }
+      const parts = targetDate.split('-').map(Number);
+      const baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      const dayOfWeek = baseDate.getDay(); 
+      const weekDates = [];
+      for(let i = 0; i <= 6; i++) {
+        let d = new Date(baseDate);
+        d.setDate(baseDate.getDate() - dayOfWeek + i);
+        weekDates.push(formatLocalDate(d));
+      }
 
-        const records = allBookings.filter(r => r.purpose !== "已取消" && r.item === targetItem && weekDates.includes(r.date));
-        const restrictions = allRestrictions.filter(r => r.item === targetItem && weekDates.includes(r.date));
-        const dailyAll = allBookings.filter(r => r.purpose !== "已取消" && r.date === targetDate);
+      const records = allBookings.filter(r => r.purpose !== "已取消" && r.item === targetItem && weekDates.includes(r.date));
+      const restrictions = allRestrictions.filter(r => r.item === targetItem && weekDates.includes(r.date));
+      const dailyAll = allBookings.filter(r => r.purpose !== "已取消" && r.date === targetDate);
 
-        renderDailyBoard({ dailyAll, tDate: targetDate }); 
-        renderTable({ weekDates, records, restrictions });
-
-        document.getElementById('syncTag').innerText = ""; 
-        toggleLoadingState(false);
+      renderDailyBoard({ dailyAll, tDate: targetDate }); 
+      renderTable({ weekDates, records, restrictions });
+      document.getElementById('syncTag').innerText = ""; 
+      toggleLoadingState(false);
     } catch(err) {
-        console.error("同步失敗:", err);
-        document.getElementById('syncTag').innerText = "(同步失敗)"; 
-        toggleLoadingState(false);
+      console.error("同步失敗:", err);
+      document.getElementById('syncTag').innerText = "(同步失敗)"; 
+      toggleLoadingState(false);
     }
   };
 
@@ -933,6 +779,32 @@
     document.getElementById('tableBox').innerHTML = h + "</table>";
   }
 
+  window.switchUserProxy = function() {
+    const sel = document.getElementById('adminSwitchName');
+    const newAccount = sel.value; const newName = sel.options[sel.selectedIndex].text;
+    if (!newAccount || newAccount === originalAdminAccount) { window.resetUserProxy(); return; }
+    spoofedUserName = newName;
+    staticData.userInfo.name = newName; staticData.userInfo.account = newAccount; 
+    document.getElementById('proxyCurrentName').innerText = newName;
+    document.getElementById('proxyAlert').style.display = 'flex';
+    document.getElementById('displayUserName').innerText = newName;
+    document.getElementById('userName').value = newName;
+    showSystemAlert(`✅ 已切換為代理模式！\n在「我要預約」與「我的紀錄」中的操作將屬於「${newName}」。`);
+    if(document.getElementById('view-booking').classList.contains('active')) window.refreshBooking();
+  };
+
+  window.resetUserProxy = function() {
+    if (!originalAdminName) return;
+    spoofedUserName = "";
+    staticData.userInfo.name = originalAdminName; staticData.userInfo.account = originalAdminAccount;
+    document.getElementById('adminSwitchName').value = originalAdminAccount;
+    document.getElementById('proxyAlert').style.display = 'none';
+    document.getElementById('displayUserName').innerText = originalAdminName;
+    document.getElementById('userName').value = originalAdminName;
+    showSystemAlert(`🔄 已還原為管理員本人。`);
+    if(document.getElementById('view-booking').classList.contains('active')) window.refreshBooking();
+  };
+
   window.openModal = function(d, p) {
     currentSel = { d, p, item: document.getElementById('itemSelect').value };
     document.getElementById('confirmDetail').innerHTML = `借用日期：<b>${d}</b><br>節次：<b>${p}</b><br>設備：<b>${currentSel.item}</b>`;
@@ -948,7 +820,115 @@
   window.submitBooking = async function() {
     if(!userId) return;
     const pVal = document.getElementById('purposeType').value === 'class' ? document.getElementById('classSelect').value : document.getElementById('otherPurpose').value;
-  // ================= 設備、班級與節次設定管理 =================
+    if(!pVal) { showSystemAlert("請填寫或選擇用途！"); return; }
+    const btn = document.querySelector('#modal button');
+    btn.innerText = "⏳ 處理中..."; btn.disabled = true;
+
+    try {
+      const bookingsSnap = await getDocs(getPublicCol('bookings'));
+      const allBookings = bookingsSnap.docs.map(d => d.data());
+      const isBooked = allBookings.some(r => r.date === currentSel.d && r.period === currentSel.p && r.item === currentSel.item && r.purpose !== "已取消");
+      if (isBooked) {
+        showSystemAlert("手腳慢了一步！該時段剛剛已被預約。");
+      } else {
+        await addDoc(getPublicCol('bookings'), {
+          date: currentSel.d, period: currentSel.p, item: currentSel.item,
+          user: staticData.userInfo.name, account: staticData.userInfo.account || staticData.userInfo.name, purpose: pVal, keyStatus: "未借出", timestamp: Date.now()
+        });
+        showSystemAlert("✅ 預約成功！");
+      }
+    } catch(err) {
+      showSystemAlert("系統錯誤: " + err.message);
+    }
+    btn.innerText = "送出預約"; btn.disabled = false; window.closeModal();
+    window.refreshBooking();
+  };
+
+  window.loadMyRecordsData = async function() {
+    if(!userId) return;
+    const upBox = document.getElementById('list-upcoming');
+    upBox.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+    document.getElementById('list-past').innerHTML = '';
+    
+    try {
+      const snap = await getDocs(getPublicCol('bookings'));
+      const allRecords = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      const currentAcc = String(staticData.userInfo.account || '').trim();
+      const myRecords = allRecords.filter(r => (r.account === currentAcc || r.user === staticData.userInfo.name));
+      
+      const today = getLocalTodayString();
+      let upcoming = [], pastEnded = [], pastCancelled = [];
+      
+      myRecords.forEach(r => {
+        if (r.purpose === '已取消') { pastCancelled.push(r); return; }
+        const pInfo = staticData.periods.find(p => p.name === r.period);
+        const pEnd = (pInfo && pInfo.end) ? pInfo.end : "23:59";
+        let isPast = false;
+        if (r.date < today) isPast = true;
+        else if (r.date === today && Date.now() > new Date(r.date.replace(/-/g, '/') + ' ' + pEnd).getTime()) isPast = true;
+        if (isPast) pastEnded.push(r); else upcoming.push(r);
+      });
+      
+      upcoming.sort((a,b) => a.date.localeCompare(b.date));
+      pastEnded.sort((a,b) => b.date.localeCompare(a.date));
+      pastCancelled.sort((a,b) => b.date.localeCompare(a.date));
+
+      upBox.innerHTML = upcoming.length ? upcoming.map(r => window.createRecordCard(r, true)).join('') : '<div style="text-align:center; padding:30px; color:#999;">目前沒有即將到來的預約 🎉</div>';
+      const pastBox = document.getElementById('list-past');
+      if (pastEnded.length === 0 && pastCancelled.length === 0) pastBox.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">目前沒有歷史紀錄</div>';
+      else pastBox.innerHTML = (pastEnded.length > 0 ? `<h3 style="color:var(--gray);">☑️ 已結束</h3>` + pastEnded.map(r => window.createRecordCard(r, false)).join('') : '') +
+                               (pastCancelled.length > 0 ? `<h3 style="color:var(--danger);">🚫 已取消</h3>` + pastCancelled.map(r => window.createRecordCard(r, false)).join('') : '');
+    } catch(e) {
+      console.error("載入紀錄失敗", e);
+    }
+  };
+
+  window.createRecordCard = function(r, isUpcoming) {
+    const isCancelled = r.purpose === '已取消';
+    let cardClass = isCancelled ? 'card cancelled' : (isUpcoming ? 'card' : 'card past');
+    let actionHtml = isCancelled ? `<div class="status-badge status-cancelled">已取消</div>` : (isUpcoming ? `<button class="btn-cancel" onclick="window.cancelUserRecord('${r.id}', this)">取消預約</button>` : `<div style="color:var(--gray); font-size:10pt;">已結束</div>`);
+    return `<div class="${cardClass}">
+              <div style="flex-grow:1;">
+                <div style="font-weight:bold; font-size:12pt; margin-bottom:8px; color:#333;">📅 ${r.date} &nbsp;|&nbsp; ⏱️ ${r.period}</div>
+                <div style="color:#555; font-size:10pt; line-height:1.6;">設備：<span style="font-weight:bold; color:var(--primary);">${r.item}</span><br>用途：${r.purpose}</div>
+              </div>
+              <div>${actionHtml}</div>
+            </div>`;
+  };
+
+  window.switchSubTab = function(tab) {
+    document.getElementById('list-upcoming').style.display = tab === 'upcoming' ? 'block' : 'none';
+    document.getElementById('list-past').style.display = tab === 'past' ? 'block' : 'none';
+    document.getElementById('tab-upcoming').className = tab === 'upcoming' ? 'tab active' : 'tab';
+    document.getElementById('tab-past').className = tab === 'past' ? 'tab active' : 'tab';
+  };
+
+  window.cancelUserRecord = function(id, btnElement) {
+    if(!userId) return;
+    window.showSystemConfirm("⚠️ 確定要取消這筆預約嗎？取消後將釋出該時段。", async () => {
+      btnElement.innerText = "⏳ 取消中..."; btnElement.disabled = true;
+      try {
+        await updateDoc(getPublicDoc('bookings', id), { purpose: "已取消" });
+        window.showSystemAlert("✅ 預約已成功取消！"); window.loadMyRecordsData(); 
+      } catch(err) {
+        window.showSystemAlert("取消失敗: " + err.message);
+      }
+    });
+  };
+
+  window.switchAdminTab = function(n) {
+    for(let i=1; i<=5; i++) {
+      const page = document.getElementById('admin-page'+i);
+      const tab = document.getElementById('admin-t'+i);
+      if(page) page.style.display = (i === n) ? 'block' : 'none';
+      if(tab) tab.className = (i === n) ? 'admin-tab active' : 'admin-tab';
+    }
+    if (n === 1) window.loadAdminDaily();
+    if (n === 3) window.loadChart();
+    if (n === 4) window.renderUserTable();
+    if (n === 5) window.renderConfigLists();
+  };
+
   window.saveConfigListsToDB = async function() {
     try {
       await updateDoc(getPublicDoc('config', 'main'), {
@@ -966,58 +946,43 @@
   window.renderConfigLists = function() {
     const itemsBox = document.getElementById('itemsListContainer');
     if (itemsBox) {
-      if (staticData.items.length === 0) {
-        itemsBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無設備項目</div>';
-      } else {
-        itemsBox.innerHTML = staticData.items.map((item, idx) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
-            <span style="font-weight:bold; color:#333; word-break:break-all;">${item}</span>
-            <div style="display:flex; gap:6px; flex-shrink:0;">
-              <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editItemConfig(${idx})">修改</button>
-              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteItemConfig(${idx})">刪除</button>
-            </div>
+      itemsBox.innerHTML = staticData.items.length === 0 ? '<div style="color:#999; text-align:center; padding:15px;">尚無設備項目</div>' : staticData.items.map((item, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
+          <span style="font-weight:bold; color:#333; word-break:break-all;">${item}</span>
+          <div style="display:flex; gap:6px; flex-shrink:0;">
+            <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editItemConfig(${idx})">修改</button>
+            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteItemConfig(${idx})">刪除</button>
           </div>
-        `).join('');
-      }
+        </div>`).join('');
     }
 
     const classesBox = document.getElementById('classesListContainer');
     if (classesBox) {
-      if (staticData.classes.length === 0) {
-        classesBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無班級項目</div>';
-      } else {
-        classesBox.innerHTML = staticData.classes.map((cls, idx) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
-            <span style="font-weight:bold; color:#333; word-break:break-all;">${cls}</span>
-            <div style="display:flex; gap:6px; flex-shrink:0;">
-              <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editClassConfig(${idx})">修改</button>
-              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteClassConfig(${idx})">刪除</button>
-            </div>
+      classesBox.innerHTML = staticData.classes.length === 0 ? '<div style="color:#999; text-align:center; padding:15px;">尚無班級項目</div>' : staticData.classes.map((cls, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
+          <span style="font-weight:bold; color:#333; word-break:break-all;">${cls}</span>
+          <div style="display:flex; gap:6px; flex-shrink:0;">
+            <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editClassConfig(${idx})">修改</button>
+            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteClassConfig(${idx})">刪除</button>
           </div>
-        `).join('');
-      }
+        </div>`).join('');
     }
 
     const periodsBox = document.getElementById('periodsListContainer');
     if (periodsBox) {
-      if (staticData.periods.length === 0) {
-        periodsBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無節次設定</div>';
-      } else {
-        periodsBox.innerHTML = staticData.periods.map((p, idx) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <span style="font-weight:bold; color:var(--primary-light); min-width:70px;">${p.name}</span>
-              <span style="background:#e0fbfc; color:var(--primary); padding:4px 10px; border-radius:15px; font-size:10pt; font-weight:bold;">🕒 ${p.start || '--:--'} ~ ${p.end || '--:--'}</span>
-            </div>
-            <div style="display:flex; gap:6px; flex-shrink:0;">
-              <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="上移">⬆️</button>
-              <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, 1)" ${idx === staticData.periods.length - 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="下移">⬇️</button>
-              <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editPeriodConfig(${idx})">修改</button>
-              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deletePeriodConfig(${idx})">刪除</button>
-            </div>
+      periodsBox.innerHTML = staticData.periods.length === 0 ? '<div style="color:#999; text-align:center; padding:15px;">尚無節次設定</div>' : staticData.periods.map((p, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-weight:bold; color:var(--primary-light); min-width:70px;">${p.name}</span>
+            <span style="background:#e0fbfc; color:var(--primary); padding:4px 10px; border-radius:15px; font-size:10pt; font-weight:bold;">🕒 ${p.start || '--:--'} ~ ${p.end || '--:--'}</span>
           </div>
-        `).join('');
-      }
+          <div style="display:flex; gap:6px; flex-shrink:0;">
+            <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="上移">⬆️</button>
+            <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, 1)" ${idx === staticData.periods.length - 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="下移">⬇️</button>
+            <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editPeriodConfig(${idx})">修改</button>
+            <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deletePeriodConfig(${idx})">刪除</button>
+          </div>
+        </div>`).join('');
     }
   };
 
@@ -1025,9 +990,7 @@
     const nameInput = document.getElementById('newPeriodName');
     const startInput = document.getElementById('newPeriodStart');
     const endInput = document.getElementById('newPeriodEnd');
-    const name = nameInput.value.trim();
-    const start = startInput.value.trim();
-    const end = endInput.value.trim();
+    const name = nameInput.value.trim(), start = startInput.value.trim(), end = endInput.value.trim();
 
     if (!name) { showSystemAlert("請輸入節次名稱！"); return; }
     if (!start || !end) { showSystemAlert("請選擇完整的開始與結束時間！"); return; }
@@ -1047,7 +1010,7 @@
     const modal = document.getElementById('customModal');
     document.getElementById('customModalTitle').innerText = "✏️ 修改節次與時間";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="text-align:left; font-size:10pt; color:#555; font-weight:bold; margin-bottom:4px;">節次名稱</div>
+      <div style="text-align:left; font-size:10pt; color:#555; font-weight:bold; margin-bottom:4px;"><label for="editPeriodName">節次名稱</label></div>
       <input type="text" id="editPeriodName" class="modal-input modal-input-admin" value="${oldP.name}" placeholder="節次名稱" aria-label="節次名稱" style="margin-bottom:12px;">
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:left; margin-bottom:12px;">
         <div>
@@ -1061,8 +1024,7 @@
       </div>
       <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#555; cursor:pointer; text-align:left; margin-bottom:10px;">
         <input type="checkbox" id="syncPeriodHistory" checked> 若修改節次名稱，同步更新已預約紀錄與禁借設定
-      </label>
-    `;
+      </label>`;
 
     const submitBtn = document.getElementById('customModalSubmit');
     submitBtn.onclick = async function() {
@@ -1074,13 +1036,9 @@
       if (!newName) { showSystemAlert("節次名稱不能為空！"); return; }
       if (!newStart || !newEnd) { showSystemAlert("請設定完整的開始與結束時間！"); return; }
       if (newStart >= newEnd) { showSystemAlert("⚠️ 結束時間必須晚於開始時間！"); return; }
-      if (staticData.periods.some((p, i) => i !== idx && p.name === newName)) {
-        showSystemAlert("⚠️ 該節次名稱已存在！"); return;
-      }
+      if (staticData.periods.some((p, i) => i !== idx && p.name === newName)) { showSystemAlert("⚠️ 該節次名稱已存在！"); return; }
 
-      submitBtn.innerText = "處理中...";
-      submitBtn.disabled = true;
-
+      submitBtn.innerText = "處理中..."; submitBtn.disabled = true;
       try {
         const oldName = oldP.name;
         staticData.periods[idx] = { name: newName, start: newStart, end: newEnd };
@@ -1089,28 +1047,18 @@
         if (syncHistory && oldName !== newName) {
           const promises = [];
           const bSnap = await getDocs(getPublicCol('bookings'));
-          bSnap.docs.forEach(d => {
-            if (d.data().period === oldName) {
-              promises.push(updateDoc(getPublicDoc('bookings', d.id), { period: newName }));
-            }
-          });
+          bSnap.docs.forEach(d => { if (d.data().period === oldName) promises.push(updateDoc(getPublicDoc('bookings', d.id), { period: newName })); });
           const rSnap = await getDocs(getPublicCol('restrictions'));
-          rSnap.docs.forEach(d => {
-            if (d.data().period === oldName) {
-              promises.push(updateDoc(getPublicDoc('restrictions', d.id), { period: newName }));
-            }
-          });
+          rSnap.docs.forEach(d => { if (d.data().period === oldName) promises.push(updateDoc(getPublicDoc('restrictions', d.id), { period: newName })); });
           if (promises.length > 0) await Promise.all(promises);
         }
-
         window.closeCustomModal();
         window.renderConfigLists();
         showSystemAlert(`✅ 節次「${newName} (${newStart}~${newEnd})」已更新！`);
       } catch (err) {
         showSystemAlert("修改失敗：" + err.message);
       } finally {
-        submitBtn.innerText = "確定";
-        submitBtn.disabled = false;
+        submitBtn.innerText = "確定"; submitBtn.disabled = false;
       }
     };
     modal.style.display = 'block';
@@ -1141,54 +1089,38 @@
     const modal = document.getElementById('customModal');
     document.getElementById('customModalTitle').innerText = "✏️ 修改設備/教室名稱";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;">原名稱：<b>${oldVal}</b></div>
+      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;"><label for="editConfigInput">原名稱：<b>${oldVal}</b></label></div>
       <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新名稱" aria-label="請輸入新設備或教室名稱">
       <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#555; cursor:pointer; text-align:left; margin-bottom:10px;">
         <input type="checkbox" id="syncHistoryRecords" checked> 同步更新已預約紀錄與禁借設定中的設備名稱
-      </label>
-    `;
+      </label>`;
     const submitBtn = document.getElementById('customModalSubmit');
     submitBtn.onclick = async function() {
       const newVal = document.getElementById('editConfigInput').value.trim();
       const syncHistory = document.getElementById('syncHistoryRecords').checked;
       if (!newVal) { showSystemAlert("名稱不能為空！"); return; }
       if (newVal === oldVal) { window.closeCustomModal(); return; }
-      if (staticData.items.some((item, i) => i !== idx && item === newVal)) {
-        showSystemAlert("⚠️ 該設備/教室名稱已存在！"); return;
-      }
+      if (staticData.items.some((item, i) => i !== idx && item === newVal)) { showSystemAlert("⚠️ 該設備/教室名稱已存在！"); return; }
 
-      submitBtn.innerText = "處理中...";
-      submitBtn.disabled = true;
-
+      submitBtn.innerText = "處理中..."; submitBtn.disabled = true;
       try {
         staticData.items[idx] = newVal;
         await window.saveConfigListsToDB();
-
         if (syncHistory) {
-          const bSnap = await getDocs(getPublicCol('bookings'));
           const bPromises = [];
-          bSnap.docs.forEach(d => {
-            if (d.data().item === oldVal) {
-              bPromises.push(updateDoc(getPublicDoc('bookings', d.id), { item: newVal }));
-            }
-          });
+          const bSnap = await getDocs(getPublicCol('bookings'));
+          bSnap.docs.forEach(d => { if (d.data().item === oldVal) bPromises.push(updateDoc(getPublicDoc('bookings', d.id), { item: newVal })); });
           const rSnap = await getDocs(getPublicCol('restrictions'));
-          rSnap.docs.forEach(d => {
-            if (d.data().item === oldVal) {
-              bPromises.push(updateDoc(getPublicDoc('restrictions', d.id), { item: newVal }));
-            }
-          });
+          rSnap.docs.forEach(d => { if (d.data().item === oldVal) bPromises.push(updateDoc(getPublicDoc('restrictions', d.id), { item: newVal })); });
           if (bPromises.length > 0) await Promise.all(bPromises);
         }
-
         window.closeCustomModal();
         window.renderConfigLists();
         showSystemAlert(`✅ 已將「${oldVal}」修改為「${newVal}」！`);
       } catch (err) {
         showSystemAlert("修改失敗：" + err.message);
       } finally {
-        submitBtn.innerText = "確定";
-        submitBtn.disabled = false;
+        submitBtn.innerText = "確定"; submitBtn.disabled = false;
       }
     };
     modal.style.display = 'block';
@@ -1200,21 +1132,16 @@
     const modal = document.getElementById('customModal');
     document.getElementById('customModalTitle').innerText = "✏️ 修改班級名稱";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;">原班級：<b>${oldVal}</b></div>
-      <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新班級名稱" aria-label="請輸入新班級名稱">
-    `;
+      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;"><label for="editConfigInput">原班級：<b>${oldVal}</b></label></div>
+      <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新班級名稱" aria-label="請輸入新班級名稱">`;
     const submitBtn = document.getElementById('customModalSubmit');
     submitBtn.onclick = async function() {
       const newVal = document.getElementById('editConfigInput').value.trim();
       if (!newVal) { showSystemAlert("班級名稱不能為空！"); return; }
       if (newVal === oldVal) { window.closeCustomModal(); return; }
-      if (staticData.classes.some((cls, i) => i !== idx && cls === newVal)) {
-        showSystemAlert("⚠️ 該班級名稱已存在！"); return;
-      }
+      if (staticData.classes.some((cls, i) => i !== idx && cls === newVal)) { showSystemAlert("⚠️ 該班級名稱已存在！"); return; }
 
-      submitBtn.innerText = "處理中...";
-      submitBtn.disabled = true;
-
+      submitBtn.innerText = "處理中..."; submitBtn.disabled = true;
       try {
         staticData.classes[idx] = newVal;
         await window.saveConfigListsToDB();
@@ -1224,8 +1151,7 @@
       } catch (err) {
         showSystemAlert("修改失敗：" + err.message);
       } finally {
-        submitBtn.innerText = "確定";
-        submitBtn.disabled = false;
+        submitBtn.innerText = "確定"; submitBtn.disabled = false;
       }
     };
     modal.style.display = 'block';
@@ -1236,7 +1162,6 @@
     const val = input.value.trim();
     if (!val) { showSystemAlert("請輸入設備或專科教室名稱！"); return; }
     if (staticData.items.includes(val)) { showSystemAlert("⚠️ 該設備/教室名稱已存在！"); return; }
-    
     staticData.items.push(val);
     input.value = '';
     await window.saveConfigListsToDB();
@@ -1258,7 +1183,6 @@
     const val = input.value.trim();
     if (!val) { showSystemAlert("請輸入班級名稱！"); return; }
     if (staticData.classes.includes(val)) { showSystemAlert("⚠️ 該班級名稱已存在！"); return; }
-    
     staticData.classes.push(val);
     input.value = '';
     await window.saveConfigListsToDB();
@@ -1280,38 +1204,34 @@
     const box = document.getElementById('adminDailyList');
     box.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
     const targetDate = document.getElementById('adminDate').value;
-    
     try {
-        const snap = await getDocs(getPublicCol('bookings'));
-        const records = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(r => r.date === targetDate && r.purpose !== "已取消");
-        
-        if(records.length === 0) { 
-            box.innerHTML = "<div style='text-align:center; padding:30px; color:#999; background:#fff; border-radius:8px; border:2px dashed #caf0f8;'>本日無預約紀錄</div>"; 
-            return; 
+      const snap = await getDocs(getPublicCol('bookings'));
+      const records = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(r => r.date === targetDate && r.purpose !== "已取消");
+      if(records.length === 0) { 
+        box.innerHTML = "<div style='text-align:center; padding:30px; color:#999; background:#fff; border-radius:8px; border:2px dashed #caf0f8;'>本日無預約紀錄</div>"; 
+        return; 
+      }
+      let html = '';
+      staticData.periods.forEach(p => {
+        const pRecords = records.filter(r => r.period === p.name);
+        if (pRecords.length > 0) {
+          html += `<h3 style="color:var(--admin-purple); margin: 20px 0 10px 0; border-bottom: 2px solid #ebfbfb; padding-bottom: 5px; font-size: 13pt;">📍 ${p.name}</h3>`;
+          html += pRecords.map(r => `
+            <div class="admin-card">
+              <div style="font-weight:bold; font-size:12pt; color:#333;">${r.item}</div>
+              <div style="color:#666; margin-top:5px; font-size:11pt;">借用人：<span style="color:var(--admin-purple); font-weight:bold;">${r.user}</span> (${r.purpose})</div>
+              <div class="key-group" style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+                <span style="font-weight:bold; color:#555; font-size:11pt;">🔑 鑰匙：</span>
+                <button class="key-btn ${r.keyStatus==='未借出'?'active-unlent':''}" onclick="window.setKey('${r.id}', '未借出', this)">未借出</button>
+                <button class="key-btn ${r.keyStatus==='已借出'?'active-lent':''}" onclick="window.setKey('${r.id}', '已借出', this)">已借出</button>
+                <button class="key-btn ${r.keyStatus==='已歸還'?'active-returned':''}" onclick="window.setKey('${r.id}', '已歸還', this)">已歸還</button>
+              </div>
+            </div>`).join('');
         }
-        
-        let html = '';
-        staticData.periods.forEach(p => {
-            const pRecords = records.filter(r => r.period === p.name);
-            if (pRecords.length > 0) {
-                html += `<h3 style="color:var(--admin-purple); margin: 20px 0 10px 0; border-bottom: 2px solid #ebfbfb; padding-bottom: 5px; font-size: 13pt;">📍 ${p.name}</h3>`;
-                html += pRecords.map(r => `
-                    <div class="admin-card">
-                    <div style="font-weight:bold; font-size:12pt; color:#333;">${r.item}</div>
-                    <div style="color:#666; margin-top:5px; font-size:11pt;">借用人：<span style="color:var(--admin-purple); font-weight:bold;">${r.user}</span> (${r.purpose})</div>
-                    <div class="key-group" style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-                        <span style="font-weight:bold; color:#555; font-size:11pt;">🔑 鑰匙：</span>
-                        <button class="key-btn ${r.keyStatus==='未借出'?'active-unlent':''}" onclick="window.setKey('${r.id}', '未借出', this)">未借出</button>
-                        <button class="key-btn ${r.keyStatus==='已借出'?'active-lent':''}" onclick="window.setKey('${r.id}', '已借出', this)">已借出</button>
-                        <button class="key-btn ${r.keyStatus==='已歸還'?'active-returned':''}" onclick="window.setKey('${r.id}', '已歸還', this)">已歸還</button>
-                    </div>
-                    </div>
-                `).join('');
-            }
-        });
-        box.innerHTML = html;
+      });
+      box.innerHTML = html;
     } catch(e) {
-        box.innerHTML = "<div style='color:red;'>讀取失敗</div>";
+      box.innerHTML = "<div style='color:red;'>讀取失敗</div>";
     }
   };
 
@@ -1322,7 +1242,6 @@
     if(status==='未借出') btn.classList.add('active-unlent');
     if(status==='已借出') btn.classList.add('active-lent');
     if(status==='已歸還') btn.classList.add('active-returned');
-    
     await updateDoc(getPublicDoc('bookings', id), { keyStatus: status });
   };
 
@@ -1332,7 +1251,6 @@
     const sDate = document.getElementById('resStartDate').value;
     const eDate = document.getElementById('resEndDate').value;
     const note = document.getElementById('resNote').value;
-    
     const days = Array.from(document.querySelectorAll('input[name="dCheck"]:checked')).map(cb => cb.value);
     const periods = Array.from(document.querySelectorAll('input[name="pCheck"]:checked')).map(cb => cb.value);
     
@@ -1346,26 +1264,26 @@
     btn.innerText = "⏳ 寫入資料中，請稍候..."; btn.disabled = true;
 
     try {
-        const sParts = sDate.split('-').map(Number);
-        const eParts = eDate.split('-').map(Number);
-        const startDate = new Date(sParts[0], sParts[1] - 1, sParts[2]);
-        const endDate = new Date(eParts[0], eParts[1] - 1, eParts[2]);
-        let count = 0;
+      const sParts = sDate.split('-').map(Number);
+      const eParts = eDate.split('-').map(Number);
+      const startDate = new Date(sParts[0], sParts[1] - 1, sParts[2]);
+      const endDate = new Date(eParts[0], eParts[1] - 1, eParts[2]);
+      let count = 0;
 
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            let dayOfWeek = d.getDay();
-            if (days.includes(dayOfWeek.toString())) {
-                let dateStr = formatLocalDate(d);
-                for(let p of periods) {
-                    await addDoc(getPublicCol('restrictions'), { item, date: dateStr, period: p, note });
-                    count++;
-                }
-            }
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        let dayOfWeek = d.getDay();
+        if (days.includes(dayOfWeek.toString())) {
+          let dateStr = formatLocalDate(d);
+          for(let p of periods) {
+            await addDoc(getPublicCol('restrictions'), { item, date: dateStr, period: p, note });
+            count++;
+          }
         }
-        showSystemAlert(`✅ 成功設定 ${count} 筆禁借紀錄！`);
-        document.getElementById('resNote').value = "";
+      }
+      showSystemAlert(`✅ 成功設定 ${count} 筆禁借紀錄！`);
+      document.getElementById('resNote').value = "";
     } catch(err) {
-        showSystemAlert("系統錯誤: " + err.message);
+      showSystemAlert("系統錯誤: " + err.message);
     }
     btn.innerText = "確認並寫入設定"; btn.disabled = false;
   };
@@ -1373,223 +1291,191 @@
   window.loadChart = async function() {
     if(!userId) return;
     try {
-        const snap = await getDocs(getPublicCol('bookings'));
-        const records = snap.docs.map(d => d.data()).filter(r => r.purpose !== "已取消");
-        
-        let itemMap = {};
-        records.forEach(r => { if (r.item) { itemMap[r.item] = (itemMap[r.item] || 0) + 1; } });
-        
-        let items = Object.keys(itemMap).map(k => ({ name: k, count: itemMap[k] })).sort((a,b) => b.count - a.count);
-        
-        const labels = items.map(d => d.name);
-        const values = items.map(d => d.count);
-
-        const ctx = document.getElementById('myChart').getContext('2d');
-        if (chartInstance) chartInstance.destroy();
-        
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{ label: '設備借用總次數', data: values, backgroundColor: 'rgba(0, 100, 102, 0.6)', borderColor: 'rgba(0, 100, 102, 1)', borderWidth: 1, borderRadius: 4 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-        });
+      const snap = await getDocs(getPublicCol('bookings'));
+      const records = snap.docs.map(d => d.data()).filter(r => r.purpose !== "已取消");
+      let itemMap = {};
+      records.forEach(r => { if (r.item) itemMap[r.item] = (itemMap[r.item] || 0) + 1; });
+      let items = Object.keys(itemMap).map(k => ({ name: k, count: itemMap[k] })).sort((a,b) => b.count - a.count);
+      const ctx = document.getElementById('myChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: items.map(d => d.name),
+          datasets: [{ label: '設備借用總次數', data: items.map(d => d.count), backgroundColor: 'rgba(0, 100, 102, 0.6)', borderColor: 'rgba(0, 100, 102, 1)', borderWidth: 1, borderRadius: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
     } catch(e) {
-        console.error("圖表載入失敗", e);
+      console.error("圖表載入失敗", e);
     }
   };
 
   window.saveUsersToDB = async function() {
-      try {
-          await updateDoc(getPublicDoc('config', 'main'), { users: staticData.users });
-          initDropdowns(); 
-          window.renderLoginDropdown(); // 儲存後同步更新登入的下拉選單
-      } catch(err) {
-          console.error(err);
-          showSystemAlert("儲存失敗：" + err.message);
-      }
+    try {
+      await updateDoc(getPublicDoc('config', 'main'), { users: staticData.users });
+      initDropdowns(); 
+      window.renderLoginDropdown(); 
+    } catch(err) {
+      showSystemAlert("儲存失敗：" + err.message);
+    }
   };
 
   window.renderUserTable = function() {
-      let html = `<table><tr><th style="width:20%">姓名</th><th style="width:28%">帳號/Email</th><th style="width:22%">權限身分</th><th style="width:30%">操作</th></tr>`;
-      staticData.users.forEach((u, i) => {
-          const isUserAdmin = u.isAdmin === true || u.isAdmin === 'true';
-          const roleTxt = isUserAdmin 
-            ? '<span style="color:var(--admin-purple); font-weight:bold; background:#e0fbfc; padding:4px 10px; border-radius:12px;">管理員</span>' 
-            : '<span style="color:#78909c;">一般教師</span>';
-          const toggleRoleBtnTxt = isUserAdmin ? '設為一般教師' : '設為管理員';
-          html += `<tr>
-              <td style="font-weight:bold;">${u.name}</td>
-              <td style="color:#555;">${u.account || u.email || '--'}</td>
-              <td>${roleTxt}</td>
-              <td>
-                  <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
-                    <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.toggleUserRole(${i})">${toggleRoleBtnTxt}</button>
-                    <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteUser(${i})">刪除</button>
-                  </div>
-              </td>
-          </tr>`;
-      });
-      html += `</table>`;
-      document.getElementById('userTableContainer').innerHTML = html;
+    let html = `<table><tr><th style="width:20%">姓名</th><th style="width:28%">帳號/Email</th><th style="width:22%">權限身分</th><th style="width:30%">操作</th></tr>`;
+    staticData.users.forEach((u, i) => {
+      const isUserAdmin = u.isAdmin === true || u.isAdmin === 'true';
+      const roleTxt = isUserAdmin ? '<span style="color:var(--admin-purple); font-weight:bold; background:#e0fbfc; padding:4px 10px; border-radius:12px;">管理員</span>' : '<span style="color:#78909c;">一般教師</span>';
+      const toggleRoleBtnTxt = isUserAdmin ? '設為一般教師' : '設為管理員';
+      html += `<tr>
+          <td style="font-weight:bold;">${u.name}</td>
+          <td style="color:#555;">${u.account || u.email || '--'}</td>
+          <td>${roleTxt}</td>
+          <td>
+            <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+              <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.toggleUserRole(${i})">${toggleRoleBtnTxt}</button>
+              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteUser(${i})">刪除</button>
+            </div>
+          </td>
+      </tr>`;
+    });
+    document.getElementById('userTableContainer').innerHTML = html + `</table>`;
   };
 
   window.toggleUserRole = function(index) {
-      const targetUser = staticData.users[index];
-      if (targetUser.account === staticData.userInfo.account || targetUser.name === staticData.userInfo.name) {
-          showSystemAlert("⚠️ 您不能解除自己目前的管理員權限！");
-          return;
-      }
-      const currentAdmin = targetUser.isAdmin === true || targetUser.isAdmin === 'true';
-      const newRoleName = currentAdmin ? "一般教師" : "管理員";
-      window.showSystemConfirm(`確定要將「${targetUser.name}」的權限更改為【${newRoleName}】嗎？`, async () => {
-          staticData.users[index].isAdmin = !currentAdmin;
-          await window.saveUsersToDB();
-          window.renderUserTable();
-          showSystemAlert(`✅ 已將「${targetUser.name}」設為${newRoleName}。`);
-      });
+    const targetUser = staticData.users[index];
+    if (targetUser.account === staticData.userInfo.account || targetUser.name === staticData.userInfo.name) {
+      showSystemAlert("⚠️ 您不能解除自己目前的管理員權限！");
+      return;
+    }
+    const currentAdmin = targetUser.isAdmin === true || targetUser.isAdmin === 'true';
+    const newRoleName = currentAdmin ? "一般教師" : "管理員";
+    window.showSystemConfirm(`確定要將「${targetUser.name}」的權限更改為【${newRoleName}】嗎？`, async () => {
+      staticData.users[index].isAdmin = !currentAdmin;
+      await window.saveUsersToDB();
+      window.renderUserTable();
+      showSystemAlert(`✅ 已將「${targetUser.name}」設為${newRoleName}。`);
+    });
   };
 
   window.deleteUser = function(index) {
-      const userToDel = staticData.users[index];
-      if (userToDel.account === staticData.userInfo.account || userToDel.name === staticData.userInfo.name) {
-          showSystemAlert("⚠️ 你不能刪除自己目前的登入帳號！");
-          return;
-      }
-      window.showSystemConfirm(`確定要刪除「${userToDel.name}」的帳號嗎？`, async () => {
-          staticData.users.splice(index, 1);
-          await window.saveUsersToDB();
-          showSystemAlert("✅ 帳號已刪除。");
-          window.renderUserTable();
-      });
+    const userToDel = staticData.users[index];
+    if (userToDel.account === staticData.userInfo.account || userToDel.name === staticData.userInfo.name) {
+      showSystemAlert("⚠️ 你不能刪除自己目前的登入帳號！");
+      return;
+    }
+    window.showSystemConfirm(`確定要刪除「${userToDel.name}」的帳號嗎？`, async () => {
+      staticData.users.splice(index, 1);
+      await window.saveUsersToDB();
+      showSystemAlert("✅ 帳號已刪除。");
+      window.renderUserTable();
+    });
   };
 
   window.openAddUserModal = function() {
-      document.getElementById('alertOverlay').style.display = 'block';
-      const modal = document.getElementById('customModal');
-      document.getElementById('customModalTitle').innerText = "➕ 新增教師帳號";
-      document.getElementById('customModalBody').innerHTML = `
-          <input type="text" id="newUserName" class="modal-input modal-input-admin" placeholder="姓名 (如: 陳老師)" aria-label="教師姓名" autocomplete="name">
-          <input type="text" id="newUserAcc" class="modal-input modal-input-admin" placeholder="登入帳號 (或 Email)" aria-label="登入帳號" autocomplete="username">
-          <input type="text" id="newUserPin" class="modal-input modal-input-admin" placeholder="登入密碼" aria-label="登入密碼" autocomplete="new-password">
-          <select id="newUserRole" class="modal-input modal-input-admin" aria-label="選擇權限角色">
-             <option value="false">一般教師</option>
-             <option value="true">系統管理員</option>
-          </select>
-      `;
-      document.getElementById('customModalSubmit').onclick = async function() {
-          const name = document.getElementById('newUserName').value.trim();
-          const acc = document.getElementById('newUserAcc').value.trim();
-          const pin = document.getElementById('newUserPin').value.trim();
-          const role = document.getElementById('newUserRole').value === 'true';
-          
-          if(!name || !pin) { showSystemAlert("請填寫姓名與密碼！"); return; }
-          if(staticData.users.find(u => u.name === name)) { showSystemAlert("⚠️ 此姓名已存在！"); return; }
+    document.getElementById('alertOverlay').style.display = 'block';
+    const modal = document.getElementById('customModal');
+    document.getElementById('customModalTitle').innerText = "➕ 新增教師帳號";
+    document.getElementById('customModalBody').innerHTML = `
+      <label for="newUserName" style="display:none;">姓名</label>
+      <input type="text" id="newUserName" class="modal-input modal-input-admin" placeholder="姓名 (如: 陳老師)" aria-label="教師姓名" autocomplete="name">
+      <label for="newUserAcc" style="display:none;">登入帳號</label>
+      <input type="text" id="newUserAcc" class="modal-input modal-input-admin" placeholder="登入帳號 (或 Email)" aria-label="登入帳號" autocomplete="username">
+      <label for="newUserPin" style="display:none;">登入密碼</label>
+      <input type="text" id="newUserPin" class="modal-input modal-input-admin" placeholder="登入密碼" aria-label="登入密碼" autocomplete="new-password">
+      <label for="newUserRole" style="display:none;">選擇權限角色</label>
+      <select id="newUserRole" class="modal-input modal-input-admin" aria-label="選擇權限角色">
+         <option value="false">一般教師</option>
+         <option value="true">系統管理員</option>
+      </select>`;
+    document.getElementById('customModalSubmit').onclick = async function() {
+      const name = document.getElementById('newUserName').value.trim();
+      const acc = document.getElementById('newUserAcc').value.trim();
+      const pin = document.getElementById('newUserPin').value.trim();
+      const role = document.getElementById('newUserRole').value === 'true';
+      if(!name || !pin) { showSystemAlert("請填寫姓名與密碼！"); return; }
+      if(staticData.users.find(u => u.name === name)) { showSystemAlert("⚠️ 此姓名已存在！"); return; }
 
-          document.getElementById('customModalSubmit').innerText = "處理中...";
-          document.getElementById('customModalSubmit').disabled = true;
-
-          staticData.users.push({ name: name, account: acc || name, pin: pin, email: acc + "@demo.com", isAdmin: role });
-          await window.saveUsersToDB();
-          
-          window.closeCustomModal();
-          showSystemAlert(`✅ 成功新增帳號：${name}`);
-          window.renderUserTable();
-          
-          document.getElementById('customModalSubmit').innerText = "確定";
-          document.getElementById('customModalSubmit').disabled = false;
-      };
-      modal.style.display = 'block';
+      document.getElementById('customModalSubmit').innerText = "處理中...";
+      document.getElementById('customModalSubmit').disabled = true;
+      staticData.users.push({ name: name, account: acc || name, pin: pin, email: acc + "@demo.com", isAdmin: role });
+      await window.saveUsersToDB();
+      window.closeCustomModal();
+      showSystemAlert(`✅ 成功新增帳號：${name}`);
+      window.renderUserTable();
+      document.getElementById('customModalSubmit').innerText = "確定";
+      document.getElementById('customModalSubmit').disabled = false;
+    };
+    modal.style.display = 'block';
   };
 
   window.promptChangeAdminPassword = function() {
-      document.getElementById('alertOverlay').style.display = 'block';
-      const modal = document.getElementById('customModal');
-      document.getElementById('customModalTitle').innerText = "🔑 修改登入密碼";
-      document.getElementById('customModalBody').innerHTML = `
-          <div style="font-size:10pt; color:#666; margin-bottom:15px; text-align:left;">請輸入您的新密碼。變更後，下次登入請使用新密碼。</div>
-          <input type="password" id="newPwdInput" class="modal-input modal-input-admin" placeholder="請輸入新密碼" aria-label="請輸入新密碼" autocomplete="new-password">
-          <input type="password" id="newPwdConfirm" class="modal-input modal-input-admin" placeholder="再次確認新密碼" aria-label="再次確認新密碼" autocomplete="new-password">
-      `;
-      document.getElementById('customModalSubmit').onclick = async function() {
-          const p1 = document.getElementById('newPwdInput').value;
-          const p2 = document.getElementById('newPwdConfirm').value;
-          if(!p1 || p1 !== p2) { showSystemAlert("密碼不一致或為空！"); return; }
-          
-          const userIdx = staticData.users.findIndex(u => u.name === staticData.userInfo.name);
-          if(userIdx !== -1) {
-              document.getElementById('customModalSubmit').innerText = "處理中...";
-              staticData.users[userIdx].pin = p1;
-              await window.saveUsersToDB();
-              window.closeCustomModal();
-              showSystemAlert("✅ 密碼修改成功！");
-              document.getElementById('customModalSubmit').innerText = "確定";
-          }
-      };
-      modal.style.display = 'block';
+    document.getElementById('alertOverlay').style.display = 'block';
+    const modal = document.getElementById('customModal');
+    document.getElementById('customModalTitle').innerText = "🔑 修改登入密碼";
+    document.getElementById('customModalBody').innerHTML = `
+      <div style="font-size:10pt; color:#666; margin-bottom:15px; text-align:left;">請輸入您的新密碼。變更後，下次登入請使用新密碼。</div>
+      <label for="newPwdInput" style="display:none;">請輸入新密碼</label>
+      <input type="password" id="newPwdInput" class="modal-input modal-input-admin" placeholder="請輸入新密碼" aria-label="請輸入新密碼" autocomplete="new-password">
+      <label for="newPwdConfirm" style="display:none;">再次確認新密碼</label>
+      <input type="password" id="newPwdConfirm" class="modal-input modal-input-admin" placeholder="再次確認新密碼" aria-label="再次確認新密碼" autocomplete="new-password">`;
+    document.getElementById('customModalSubmit').onclick = async function() {
+      const p1 = document.getElementById('newPwdInput').value;
+      const p2 = document.getElementById('newPwdConfirm').value;
+      if(!p1 || p1 !== p2) { showSystemAlert("密碼不一致或為空！"); return; }
+      const userIdx = staticData.users.findIndex(u => u.name === staticData.userInfo.name);
+      if(userIdx !== -1) {
+        document.getElementById('customModalSubmit').innerText = "處理中...";
+        staticData.users[userIdx].pin = p1;
+        await window.saveUsersToDB();
+        window.closeCustomModal();
+        showSystemAlert("✅ 密碼修改成功！");
+        document.getElementById('customModalSubmit').innerText = "確定";
+      }
+    };
+    modal.style.display = 'block';
   };
 
-  // 智慧判斷 Excel 欄位的批次匯入功能
   window.importExcel = function(e) {
-      const file = e.target.files[0];
-      if(!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = async function(evt) {
-          try {
-              const data = new Uint8Array(evt.target.result);
-              const workbook = XLSX.read(data, {type: 'array'});
-              const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-              const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-              
-              let newUsers = [];
-              let addedCount = 0;
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        let newUsers = [], addedCount = 0;
 
-              jsonData.forEach(row => {
-                  // 智慧尋找可能對應的欄位名稱
-                  const name = row['姓名'] || row['Name'] || row['老師姓名'] || row['使用者名稱'];
-                  const email = row['電子郵件'] || row['Email'] || row['email'] || row['信箱'];
-                  const account = row['帳號'] || row['Account'] || (email ? String(email).split('@')[0] : '');
-                  const pin = row['密碼'] || row['Password'] || account || '123456'; // 若無密碼預設為帳號或 123456
-                  const roleVal = String(row['權限'] || row['身分'] || row['isAdmin'] || '').trim();
-                  const isAdmin = roleVal === '管理員' || roleVal.toLowerCase() === 'true';
-                  
-                  if(name) {
-                      // 以「姓名」作為唯一識別，避免重複加入同名老師
-                      if(!staticData.users.find(u => u.name === String(name).trim())) {
-                          newUsers.push({ 
-                              name: String(name).trim(), 
-                              account: account ? String(account).trim() : String(name).trim(), 
-                              pin: String(pin).trim(), 
-                              email: email ? String(email).trim() : `${name}@demo.com`, 
-                              isAdmin: isAdmin 
-                          });
-                          addedCount++;
-                      }
-                  }
-              });
-              
-              if(newUsers.length > 0) {
-                  staticData.users = staticData.users.concat(newUsers);
-                  await window.saveUsersToDB();
-                  showSystemAlert(`✅ 成功匯入 ${addedCount} 筆新帳號！`);
-                  window.renderUserTable();
-              } else {
-                  showSystemAlert("⚠️ 找不到新名單。\n可能是檔案中沒有包含「姓名」欄位，或是名單內的老師已經全部存在系統中了。");
-              }
-          } catch (err) {
-              console.error(err);
-              showSystemAlert("讀取 Excel 失敗，請確認檔案是否為 .xlsx 格式且內容未損毀。");
+        jsonData.forEach(row => {
+          const name = row['姓名'] || row['Name'] || row['老師姓名'] || row['使用者名稱'];
+          const email = row['電子郵件'] || row['Email'] || row['email'] || row['信箱'];
+          const account = row['帳號'] || row['Account'] || (email ? String(email).split('@')[0] : '');
+          const pin = row['密碼'] || row['Password'] || account || '123456'; 
+          const roleVal = String(row['權限'] || row['身分'] || row['isAdmin'] || '').trim();
+          const isAdmin = roleVal === '管理員' || roleVal.toLowerCase() === 'true';
+          if(name && !staticData.users.find(u => u.name === String(name).trim())) {
+            newUsers.push({ name: String(name).trim(), account: account ? String(account).trim() : String(name).trim(), pin: String(pin).trim(), email: email ? String(email).trim() : `${name}@demo.com`, isAdmin: isAdmin });
+            addedCount++;
           }
-      };
-      reader.readAsArrayBuffer(file);
-      e.target.value = ''; // 重設 input 讓同一個檔案可以重複選取
+        });
+        if(newUsers.length > 0) {
+          staticData.users = staticData.users.concat(newUsers);
+          await window.saveUsersToDB();
+          showSystemAlert(`✅ 成功匯入 ${addedCount} 筆新帳號！`);
+          window.renderUserTable();
+        } else {
+          showSystemAlert("⚠️ 找不到新名單。\n可能是檔案中沒有包含「姓名」欄位，或是名單內的老師已經全部存在系統中了。");
+        }
+      } catch (err) {
+        showSystemAlert("讀取 Excel 失敗，請確認檔案是否為 .xlsx 格式且內容未損毀。");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = ''; 
   };
 
-  // 啟動 Firebase
   initFirebase();
-
 </script>
 </body>
 </html>
