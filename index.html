@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>教學設備與專科教室借用系統</title>
+  <title>長安教學設備借用系統</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -163,7 +163,7 @@
       <input type="password" id="loginPinInput" class="login-input" placeholder="請輸入密碼" style="margin-bottom: 10px;" aria-label="請輸入密碼" autocomplete="current-password">
       <div style="font-size: 10pt; color: #555; text-align: left; margin-bottom: 25px; line-height: 1.5; background: #e0fbfc; padding: 12px; border-radius: 10px; border: 2px dashed #caf0f8; font-weight: 600;">
         💡 請選擇您的姓名，並輸入密碼登入。<br>
-        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴或 123456)</span>
+        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴)</span>
       </div>
       <button id="btnLoginSubmit" class="btn-login" onclick="window.doLogin()">Login 登入</button>
     </div>
@@ -306,7 +306,7 @@
              </label>
           </div>
           <div style="font-size: 10pt; color: #78909c; margin-bottom: 10px; line-height: 1.5;">
-             ※ 批次匯入 Excel 支援多種欄位名稱：系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 或預設為 123456。若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
+             ※ 批次匯入 Excel 支援多種欄位名稱：系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 。若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
           </div>
           <div id="userTableContainer" style="overflow-x:auto;"></div>
         </div>
