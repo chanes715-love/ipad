@@ -352,7 +352,7 @@
           <div id="admin-t2" class="admin-tab" onclick="window.switchAdminTab(2)">⚙️ 批次禁借設定</div>
           <div id="admin-t3" class="admin-tab" onclick="window.switchAdminTab(3)">📊 統計圖表</div>
           <div id="admin-t4" class="admin-tab" onclick="window.switchAdminTab(4)">👥 帳號管理</div>
-          <div id="admin-t5" class="admin-tab" onclick="window.switchAdminTab(5)">🛠️ 設備與班級設定</div>
+          <div id="admin-t5" class="admin-tab" onclick="window.switchAdminTab(5)">🛠️ 設備、班級與節次設定</div>
         </div>
 
         <!-- 每日狀態 -->
@@ -428,7 +428,7 @@
 
         <!-- 設備與班級設定 -->
         <div id="admin-page5" style="display:none;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
             
             <!-- 設備/教室管理 -->
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8;">
@@ -448,6 +448,22 @@
                 <button class="btn-admin-active" onclick="window.addClassConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; padding-right:4px;"></div>
+            </div>
+
+            <!-- 節次與時間管理 -->
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8; grid-column: 1 / -1;">
+              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">⏱️ 節次與上下課時間設定</h3>
+              <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+                <input type="text" id="newPeriodName" class="admin-input" placeholder="節次名稱 (如: 早自習、第八節)" style="flex: 1 1 160px;" aria-label="新節次名稱">
+                <div style="display:flex; align-items:center; gap:6px; flex: 1 1 240px;">
+                  <label for="newPeriodStart" style="font-weight:bold; color:#555; font-size:10pt; white-space:nowrap;">時間：</label>
+                  <input type="time" id="newPeriodStart" class="admin-input" value="08:10" style="padding:9px;" aria-label="開始時間">
+                  <span style="font-weight:bold; color:#777;">至</span>
+                  <input type="time" id="newPeriodEnd" class="admin-input" value="09:00" style="padding:9px;" aria-label="結束時間">
+                </div>
+                <button class="btn-admin-active" onclick="window.addPeriodConfig()" style="white-space:nowrap;">➕ 新增節次</button>
+              </div>
+              <div id="periodsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
           </div>
@@ -498,7 +514,7 @@
   import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // === 🛑 在這裡貼上你的 Firebase 設定 🛑 ===
-const firebaseConfig = {
+ const firebaseConfig = {
   apiKey: "AIzaSyCuFAxYwAA8yTN4WvonaR50CBxy48Cq3d8",
   authDomain: "equipment-86d63.firebaseapp.com",
   projectId: "equipment-86d63",
@@ -604,10 +620,15 @@ const firebaseConfig = {
   }
   setupActivityListeners();
 
+  function formatLocalDate(d) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   function getLocalTodayString() {
-    const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000;
-    return (new Date(now - offset)).toISOString().split('T')[0];
+    return formatLocalDate(new Date());
   }
 
   // ================= 彈出視窗工具 =================
@@ -823,13 +844,14 @@ const firebaseConfig = {
         const restrictionsSnap = await getDocs(getPublicCol('restrictions'));
         const allRestrictions = restrictionsSnap.docs.map(d => ({id: d.id, ...d.data()}));
 
-        const baseDate = new Date(targetDate.replace(/-/g, '/'));
+        const parts = targetDate.split('-').map(Number);
+        const baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
         const dayOfWeek = baseDate.getDay(); 
         const weekDates = [];
         for(let i = 0; i <= 6; i++) {
             let d = new Date(baseDate);
             d.setDate(baseDate.getDate() - dayOfWeek + i);
-            weekDates.push(d.toISOString().split('T')[0]);
+            weekDates.push(formatLocalDate(d));
         }
 
         const records = allBookings.filter(r => r.purpose !== "已取消" && r.item === targetItem && weekDates.includes(r.date));
@@ -867,21 +889,35 @@ const firebaseConfig = {
   }
 
   function renderTable(data) {
-    let h = `<table><tr><th style="width:100px;">節次</th>`;
+    const selectedDate = document.getElementById('targetDate').value;
+    let h = `<table><tr><th style="width:115px;">節次 / 時間</th>`;
     data.weekDates.forEach(d => {
-      const dayIdx = new Date(d.replace(/-/g, '/')).getDay();
-      h += `<th style="${(dayIdx===0||dayIdx===6)?'color: var(--danger);':''}">${d.slice(5)}<br><span style="font-size:10pt; font-weight:normal;">(${dayNames[dayIdx]})</span></th>`;
+      const parts = d.split('-').map(Number);
+      const dayIdx = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
+      const isTarget = d === selectedDate;
+      const weekendColor = (dayIdx===0||dayIdx===6) ? 'color: var(--danger);' : '';
+      const activeBg = isTarget ? 'background: #caf0f8; box-shadow: inset 0 -3px 0 var(--primary);' : '';
+      h += `<th style="${weekendColor}${activeBg}">${d.slice(5)}<br><span style="font-size:10pt; font-weight:normal;">(${dayNames[dayIdx]})</span></th>`;
     });
     h += `</tr>`;
     
-    const nowTs = Date.now(); 
+    const todayStr = getLocalTodayString(); 
+    const nowTs = Date.now();
     staticData.periods.forEach(p => {
-      h += `<tr><td style="font-weight:bold; background:#f8fafc; color:#555;">${p.name}</td>`;
+      const timeRangeHtml = (p.start && p.end) ? `<div style="font-size:8.5pt; color:#888; font-weight:normal; margin-top:2px;">${p.start}~${p.end}</div>` : '';
+      h += `<tr><td style="font-weight:bold; background:#f8fafc; color:#555;">${p.name}${timeRangeHtml}</td>`;
       data.weekDates.forEach(d => {
-        let periodEndTs = p.end ? new Date(d.replace(/-/g, '/') + ' ' + p.end).getTime() : nowTs + 9999999;
         const isB = data.records.find(r => r.date === d && r.period === p.name);
         const isR = data.restrictions.find(r => r.date === d && r.period === p.name);
         
+        let isExpired = false;
+        if (d < todayStr) {
+          isExpired = true;
+        } else if (d === todayStr && p.end) {
+          const endDateTime = new Date(d.replace(/-/g, '/') + ' ' + p.end).getTime();
+          if (nowTs > endDateTime) isExpired = true;
+        }
+
         if (isR) h += `<td class="cell-restricted">🔒 ${isR.note || '禁借'}</td>`;
         else if (isB) {
           const currentAcc = String(staticData.userInfo.account || '').trim();
@@ -889,7 +925,7 @@ const firebaseConfig = {
           const isMe = bookedAcc === currentAcc || isB.user === staticData.userInfo.name;
           h += `<td><span class="${isMe?'cell-mine':'cell-booked'}">${isMe?'本人預約':isB.user}</span></td>`;
         } 
-        else if (periodEndTs < nowTs) h += `<td><span class="cell-past">已過期</span></td>`;
+        else if (isExpired) h += `<td><span class="cell-past">已過期</span></td>`;
         else h += `<td><button class="btn-book" onclick="window.openModal('${d}','${p.name}')">預約</button></td>`;
       });
       h += `</tr>`;
@@ -912,149 +948,13 @@ const firebaseConfig = {
   window.submitBooking = async function() {
     if(!userId) return;
     const pVal = document.getElementById('purposeType').value === 'class' ? document.getElementById('classSelect').value : document.getElementById('otherPurpose').value;
-    const btn = document.querySelector('#modal button');
-    btn.innerText = "⏳ 處理中..."; btn.disabled = true;
-
-    try {
-        const snap = await getDocs(getPublicCol('bookings'));
-        const allBookings = snap.docs.map(d => d.data());
-        const isBooked = allBookings.some(r => r.purpose !== "已取消" && r.date === currentSel.d && r.period === currentSel.p && r.item === currentSel.item);
-        
-        if (isBooked) {
-            showSystemAlert("❌ 手腳慢了一步！該時段剛剛已被其他人預約囉。");
-        } else {
-            await addDoc(getPublicCol('bookings'), {
-                date: currentSel.d,
-                period: currentSel.p,
-                item: currentSel.item,
-                user: staticData.userInfo.name,
-                account: staticData.userInfo.account,
-                email: staticData.userInfo.email,
-                purpose: pVal,
-                keyStatus: "未借出",
-                timestamp: Date.now()
-            });
-            showSystemAlert("✅ 預約成功！");
-        }
-    } catch(err) {
-        showSystemAlert("⚠️ 預約失敗: " + err.message);
-    }
-    
-    btn.innerText = "送出預約"; btn.disabled = false; window.closeModal();
-    window.refreshBooking();
-  };
-
-  window.loadMyRecordsData = async function() {
-    if(!userId) return;
-    const upBox = document.getElementById('list-upcoming');
-    upBox.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
-    document.getElementById('list-past').innerHTML = '';
-    
-    try {
-        const snap = await getDocs(getPublicCol('bookings'));
-        const myRecords = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(r => r.account === staticData.userInfo.account || r.user === staticData.userInfo.name);
-        
-        const nowTs = Date.now();
-        let upcoming = [], pastEnded = [], pastCancelled = [];
-        
-        myRecords.forEach(r => {
-            if (r.purpose === '已取消') { pastCancelled.push(r); return; }
-            let isPast = false;
-            const pInfo = staticData.periods.find(p => p.name === r.period);
-            if (pInfo && pInfo.end) { 
-                if (nowTs > new Date(r.date.replace(/-/g, '/') + ' ' + pInfo.end).getTime()) isPast = true; 
-            } else { 
-                if (r.date < getLocalTodayString()) isPast = true; 
-            }
-            if (isPast) pastEnded.push(r); else upcoming.push(r);
-        });
-
-        upcoming.sort((a, b) => a.date.localeCompare(b.date));
-        pastEnded.sort((a, b) => b.date.localeCompare(a.date));
-        
-        upBox.innerHTML = upcoming.length ? upcoming.map(r => createRecordCard(r, true)).join('') : '<div style="text-align:center; padding:30px; color:#999; background:#fff; border-radius:8px; border:2px dashed #caf0f8;">目前沒有即將到來的預約 🎉</div>';
-        
-        const pastBox = document.getElementById('list-past');
-        if (pastEnded.length === 0 && pastCancelled.length === 0) {
-            pastBox.innerHTML = '<div style="text-align:center; padding:30px; color:#999; background:#fff; border-radius:8px; border:2px dashed #caf0f8;">目前沒有歷史紀錄</div>';
-        } else {
-            pastBox.innerHTML = (pastEnded.length > 0 ? `<div style="font-weight:bold; margin:20px 0 10px 0; color:var(--gray);">☑️ 已結束</div>` + pastEnded.map(r => createRecordCard(r, false)).join('') : '') +
-                                (pastCancelled.length > 0 ? `<div style="font-weight:bold; margin:20px 0 10px 0; color:var(--danger);">🚫 已取消</div>` + pastCancelled.map(r => createRecordCard(r, false)).join('') : '');
-        }
-    } catch(err) {
-        showSystemAlert("載入紀錄失敗：" + err.message);
-    }
-  };
-
-  function createRecordCard(r, isUpcoming) {
-    const isCancelled = r.purpose === '已取消';
-    let cardClass = isCancelled ? 'card cancelled' : (isUpcoming ? 'card' : 'card past');
-    let actionHtml = isCancelled ? `<div class="status-badge" style="background:#ffebee; color:#e74c3c;">已取消</div>` : (isUpcoming ? `<button class="btn-cancel" onclick="window.cancelUserRecord('${r.id}', this)">取消預約</button>` : `<div style="color:#95a5a6; font-style:italic;">已結束</div>`);
-    return `<div class="${cardClass}"><div class="info"><div class="title">📅 ${r.date} &nbsp;|&nbsp; ⏱️ ${r.period}</div><div class="detail">設備/教室：<span>${r.item}</span><br>預約用途：${r.purpose !== '已取消' ? r.purpose : '--'}</div></div><div>${actionHtml}</div></div>`;
-  }
-
-  window.switchSubTab = function(tab) {
-    document.getElementById('list-upcoming').style.display = tab === 'upcoming' ? 'block' : 'none';
-    document.getElementById('list-past').style.display = tab === 'past' ? 'block' : 'none';
-    document.getElementById('tab-upcoming').className = tab === 'upcoming' ? 'tab active' : 'tab';
-    document.getElementById('tab-past').className = tab === 'past' ? 'tab active' : 'tab';
-  };
-
-  window.cancelUserRecord = function(docId, btnElement) {
-    window.showSystemConfirm("⚠️ 確定要取消這筆預約嗎？", async () => {
-      btnElement.innerText = "⏳ 取消中..."; btnElement.disabled = true;
-      if(!userId) return;
-      try {
-          await updateDoc(getPublicDoc('bookings', docId), { purpose: "已取消" });
-          showSystemAlert("✅ 預約已成功取消！"); 
-          window.loadMyRecordsData(); 
-      } catch(err) {
-          showSystemAlert("取消失敗: " + err.message);
-      }
-    });
-  };
-
-  window.switchUserProxy = function() {
-    const sel = document.getElementById('adminSwitchName');
-    const newAccount = sel.value; const newName = sel.options[sel.selectedIndex].text;
-    if (!newAccount || newAccount === originalAdminAccount) { window.resetUserProxy(); return; }
-    spoofedUserName = newName; staticData.userInfo.name = newName; staticData.userInfo.account = newAccount; 
-    document.getElementById('proxyCurrentName').innerText = newName; document.getElementById('proxyAlert').style.display = 'flex';
-    document.getElementById('displayUserName').innerText = newName;
-    showSystemAlert(`✅ 已切換為代理模式！\n操作將屬於「${newName}」。`);
-    if(document.getElementById('view-booking').classList.contains('active')) window.refreshBooking();
-  };
-  
-  window.resetUserProxy = function() {
-    if (!originalAdminName) return;
-    spoofedUserName = ""; staticData.userInfo.name = originalAdminName; staticData.userInfo.account = originalAdminAccount;
-    document.getElementById('adminSwitchName').value = originalAdminAccount;
-    document.getElementById('proxyAlert').style.display = 'none';
-    document.getElementById('displayUserName').innerText = originalAdminName;
-    showSystemAlert(`🔄 已還原為管理員本人。`);
-    if(document.getElementById('view-booking').classList.contains('active')) window.refreshBooking();
-  };
-
-  window.switchAdminTab = function(n) {
-    for(let i=1; i<=5; i++) {
-        const page = document.getElementById('admin-page'+i);
-        const tab = document.getElementById('admin-t'+i);
-        if(page) page.style.display = n === i ? 'block' : 'none';
-        if(tab) tab.className = n === i ? 'admin-tab active' : 'admin-tab';
-    }
-    
-    if (n === 1) window.loadAdminDaily();
-    else if (n === 3) window.loadChart();
-    else if (n === 4) window.renderUserTable();
-    else if (n === 5) window.renderConfigLists();
-  };
-
-  // ================= 設備與班級設定管理 =================
+  // ================= 設備、班級與節次設定管理 =================
   window.saveConfigListsToDB = async function() {
     try {
       await updateDoc(getPublicDoc('config', 'main'), {
         items: staticData.items,
-        classes: staticData.classes
+        classes: staticData.classes,
+        periods: staticData.periods
       });
       initDropdowns();
     } catch(err) {
@@ -1097,6 +997,142 @@ const firebaseConfig = {
         `).join('');
       }
     }
+
+    const periodsBox = document.getElementById('periodsListContainer');
+    if (periodsBox) {
+      if (staticData.periods.length === 0) {
+        periodsBox.innerHTML = '<div style="color:#999; text-align:center; padding:15px;">尚無節次設定</div>';
+      } else {
+        periodsBox.innerHTML = staticData.periods.map((p, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-weight:bold; color:var(--primary-light); min-width:70px;">${p.name}</span>
+              <span style="background:#e0fbfc; color:var(--primary); padding:4px 10px; border-radius:15px; font-size:10pt; font-weight:bold;">🕒 ${p.start || '--:--'} ~ ${p.end || '--:--'}</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="上移">⬆️</button>
+              <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, 1)" ${idx === staticData.periods.length - 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="下移">⬇️</button>
+              <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editPeriodConfig(${idx})">修改</button>
+              <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deletePeriodConfig(${idx})">刪除</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  };
+
+  window.addPeriodConfig = async function() {
+    const nameInput = document.getElementById('newPeriodName');
+    const startInput = document.getElementById('newPeriodStart');
+    const endInput = document.getElementById('newPeriodEnd');
+    const name = nameInput.value.trim();
+    const start = startInput.value.trim();
+    const end = endInput.value.trim();
+
+    if (!name) { showSystemAlert("請輸入節次名稱！"); return; }
+    if (!start || !end) { showSystemAlert("請選擇完整的開始與結束時間！"); return; }
+    if (start >= end) { showSystemAlert("⚠️ 結束時間必須晚於開始時間！"); return; }
+    if (staticData.periods.some(p => p.name === name)) { showSystemAlert("⚠️ 該節次名稱已存在！"); return; }
+
+    staticData.periods.push({ name, start, end });
+    nameInput.value = '';
+    await window.saveConfigListsToDB();
+    window.renderConfigLists();
+    showSystemAlert(`✅ 已新增節次：「${name} (${start}~${end})」`);
+  };
+
+  window.editPeriodConfig = function(idx) {
+    const oldP = staticData.periods[idx];
+    document.getElementById('alertOverlay').style.display = 'block';
+    const modal = document.getElementById('customModal');
+    document.getElementById('customModalTitle').innerText = "✏️ 修改節次與時間";
+    document.getElementById('customModalBody').innerHTML = `
+      <div style="text-align:left; font-size:10pt; color:#555; font-weight:bold; margin-bottom:4px;">節次名稱</div>
+      <input type="text" id="editPeriodName" class="modal-input modal-input-admin" value="${oldP.name}" placeholder="節次名稱" aria-label="節次名稱" style="margin-bottom:12px;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:left; margin-bottom:12px;">
+        <div>
+          <label for="editPeriodStart" style="font-size:10pt; color:#555; font-weight:bold;">開始時間</label>
+          <input type="time" id="editPeriodStart" class="modal-input modal-input-admin" value="${oldP.start || '08:00'}" style="margin-bottom:0;">
+        </div>
+        <div>
+          <label for="editPeriodEnd" style="font-size:10pt; color:#555; font-weight:bold;">結束時間</label>
+          <input type="time" id="editPeriodEnd" class="modal-input modal-input-admin" value="${oldP.end || '09:00'}" style="margin-bottom:0;">
+        </div>
+      </div>
+      <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#555; cursor:pointer; text-align:left; margin-bottom:10px;">
+        <input type="checkbox" id="syncPeriodHistory" checked> 若修改節次名稱，同步更新已預約紀錄與禁借設定
+      </label>
+    `;
+
+    const submitBtn = document.getElementById('customModalSubmit');
+    submitBtn.onclick = async function() {
+      const newName = document.getElementById('editPeriodName').value.trim();
+      const newStart = document.getElementById('editPeriodStart').value.trim();
+      const newEnd = document.getElementById('editPeriodEnd').value.trim();
+      const syncHistory = document.getElementById('syncPeriodHistory').checked;
+
+      if (!newName) { showSystemAlert("節次名稱不能為空！"); return; }
+      if (!newStart || !newEnd) { showSystemAlert("請設定完整的開始與結束時間！"); return; }
+      if (newStart >= newEnd) { showSystemAlert("⚠️ 結束時間必須晚於開始時間！"); return; }
+      if (staticData.periods.some((p, i) => i !== idx && p.name === newName)) {
+        showSystemAlert("⚠️ 該節次名稱已存在！"); return;
+      }
+
+      submitBtn.innerText = "處理中...";
+      submitBtn.disabled = true;
+
+      try {
+        const oldName = oldP.name;
+        staticData.periods[idx] = { name: newName, start: newStart, end: newEnd };
+        await window.saveConfigListsToDB();
+
+        if (syncHistory && oldName !== newName) {
+          const promises = [];
+          const bSnap = await getDocs(getPublicCol('bookings'));
+          bSnap.docs.forEach(d => {
+            if (d.data().period === oldName) {
+              promises.push(updateDoc(getPublicDoc('bookings', d.id), { period: newName }));
+            }
+          });
+          const rSnap = await getDocs(getPublicCol('restrictions'));
+          rSnap.docs.forEach(d => {
+            if (d.data().period === oldName) {
+              promises.push(updateDoc(getPublicDoc('restrictions', d.id), { period: newName }));
+            }
+          });
+          if (promises.length > 0) await Promise.all(promises);
+        }
+
+        window.closeCustomModal();
+        window.renderConfigLists();
+        showSystemAlert(`✅ 節次「${newName} (${newStart}~${newEnd})」已更新！`);
+      } catch (err) {
+        showSystemAlert("修改失敗：" + err.message);
+      } finally {
+        submitBtn.innerText = "確定";
+        submitBtn.disabled = false;
+      }
+    };
+    modal.style.display = 'block';
+  };
+
+  window.movePeriodConfig = async function(idx, dir) {
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= staticData.periods.length) return;
+    const temp = staticData.periods[idx];
+    staticData.periods[idx] = staticData.periods[targetIdx];
+    staticData.periods[targetIdx] = temp;
+    await window.saveConfigListsToDB();
+    window.renderConfigLists();
+  };
+
+  window.deletePeriodConfig = function(idx) {
+    const target = staticData.periods[idx];
+    window.showSystemConfirm(`確定要刪除節次「${target.name} (${target.start}~${target.end})」嗎？`, async () => {
+      staticData.periods.splice(idx, 1);
+      await window.saveConfigListsToDB();
+      window.renderConfigLists();
+    });
   };
 
   window.editItemConfig = function(idx) {
@@ -1310,14 +1346,16 @@ const firebaseConfig = {
     btn.innerText = "⏳ 寫入資料中，請稍候..."; btn.disabled = true;
 
     try {
-        const startDate = new Date(sDate.replace(/-/g, '/'));
-        const endDate = new Date(eDate.replace(/-/g, '/'));
+        const sParts = sDate.split('-').map(Number);
+        const eParts = eDate.split('-').map(Number);
+        const startDate = new Date(sParts[0], sParts[1] - 1, sParts[2]);
+        const endDate = new Date(eParts[0], eParts[1] - 1, eParts[2]);
         let count = 0;
 
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             let dayOfWeek = d.getDay();
             if (days.includes(dayOfWeek.toString())) {
-                let dateStr = d.toISOString().split('T')[0];
+                let dateStr = formatLocalDate(d);
                 for(let p of periods) {
                     await addDoc(getPublicCol('restrictions'), { item, date: dateStr, period: p, note });
                     count++;
