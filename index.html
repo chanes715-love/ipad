@@ -3,126 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>長安教學設備借用系統</title>
+  <title>長安ipad充電車借用系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root { 
-      --primary: #1282a2;
-      --primary-light: #034078;
-      --bg: #e0fbfc;
+      --primary: #6d28d9;        /* 主色：皇家紫 / 紫羅蘭 */
+      --primary-light: #4c1d95;  /* 深紫：茄子紫 / 桑椹紫 */
+      --accent-blue: #8b5cf6;    /* 點綴亮紫：薰衣草紫 */
+      --bg: #f5f3ff;             /* 淡紫背景底色 */
       --container-bg: #ffffff;
-      --text-dark: #0a1128;
-      --success: #38b000; 
-      --danger: #d90429; 
-      --past: #ced4da; 
-      --gray: #6c757d; 
-      --admin-purple: #006466;
-      --admin-bg: #ebfbfb;     
+      --text-dark: #2e1065;      /* 深紫黑文字 */
+      --border-soft: #ddd6fe;    /* 柔和紫框線 */
+      --border-light: #ede9fe;
+      --success: #059669;        /* 翠綠 */
+      --danger: #e11d48;         /* 玫瑰紅 */
+      --past: #dcd7fe; 
+      --gray: #6b7280; 
+      --admin-purple: #5b21b6;   /* 管理員深紫 */
+      --admin-bg: #f3e8ff;     
     }
-    body { font-family: 'Nunito', 'Microsoft JhengHei', sans-serif; background-color: var(--bg); margin: 0; padding: 0; font-size: 11pt; color: #333; overflow-x: hidden; }
-    h1, h2, h3, .app-title { font-family: 'Fredoka', 'Microsoft JhengHei', sans-serif; color: var(--primary-light); }
-    .bg-illustration { position: fixed; opacity: 0.85; z-index: 0; pointer-events: none; }
-    .app-wrapper { position: relative; max-width: 1000px; margin: 30px auto; z-index: 10; filter: drop-shadow(0 15px 30px rgba(18, 130, 162, 0.15)); }
-    .wavy-top { width: 100%; height: 60px; background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path fill="%23ffffff" d="M0,40 Q60,0 120,40 T240,40 T360,40 T480,40 T600,40 T720,40 T840,40 T960,40 T1080,40 T1200,40 T1320,40 T1440,40 L1440,100 L0,100 Z"></path></svg>') no-repeat bottom; background-size: 100% 60px; }
-    .wavy-bottom { width: 100%; height: 45px; background-color: #e6ccb2; background-image: repeating-linear-gradient(15deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px), repeating-linear-gradient(-15deg, transparent, transparent 15px, rgba(0,0,0,0.02) 15px, rgba(0,0,0,0.02) 30px); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
-    .main-content { background-color: var(--container-bg); padding: 10px 40px 40px 40px; }
-    @media (max-width: 768px) { .app-wrapper { margin: 10px auto; } .main-content { padding: 10px 20px 30px 20px; } .bg-illustration { display: none; } }
-    .app-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 25px; border-bottom: 3px dashed #caf0f8; padding-bottom: 15px; }
-    .app-title { font-size: 2.2rem; margin: 0; color: var(--primary); letter-spacing: 1px; font-weight: bold; }
-    .app-nav { display: flex; gap: 10px; flex-grow: 1; justify-content: center; overflow-x: auto; white-space: nowrap; margin-top: 10px; }
-    .nav-item { padding: 10px 20px; cursor: pointer; font-weight: 700; color: #777; background: #f8f9fa; border-radius: 30px; transition: 0.3s; font-size: 11pt; border: 2px solid transparent; }
-    .nav-item:hover { background: #e0fbfc; transform: translateY(-2px); }
-    .nav-item.active { background: var(--primary); color: white; border-color: var(--primary-light); box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); }
-    .nav-item.admin-nav { background: #f5f5f5; color: var(--admin-purple); display: none; }
+    body { 
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; 
+      background-color: var(--bg); 
+      margin: 0; padding: 0; font-size: 11pt; color: var(--text-dark); overflow-x: hidden; 
+    }
+    h1, h2, h3, .app-title { 
+      font-family: 'Noto Serif TC', 'Noto Sans TC', 'Microsoft JhengHei', serif; 
+      color: var(--primary-light); 
+      letter-spacing: 1px;
+    }
+    .bg-illustration { position: fixed; opacity: 0.78; z-index: 0; pointer-events: none; }
+    .app-wrapper { 
+      position: relative; max-width: 1000px; margin: 30px auto; z-index: 10; 
+      box-shadow: 0 12px 35px rgba(76, 29, 149, 0.14); 
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #ddd6fe;
+    }
+    /* 紫色科技幾何波紋頂部飾條 */
+    .wavy-top { 
+      width: 100%; height: 28px; 
+      background-color: var(--primary-light);
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="28" viewBox="0 0 56 28"><g fill="none" stroke="%23a78bfa" stroke-width="1.3" opacity="0.5"><circle cx="28" cy="28" r="24"/><circle cx="28" cy="28" r="18"/><circle cx="28" cy="28" r="12"/><circle cx="28" cy="28" r="6"/><circle cx="0" cy="28" r="24"/><circle cx="0" cy="28" r="18"/><circle cx="0" cy="28" r="12"/><circle cx="0" cy="28" r="6"/><circle cx="56" cy="28" r="24"/><circle cx="56" cy="28" r="18"/><circle cx="56" cy="28" r="12"/><circle cx="56" cy="28" r="6"/><circle cx="14" cy="14" r="24"/><circle cx="14" cy="14" r="18"/><circle cx="14" cy="14" r="12"/><circle cx="14" cy="14" r="6"/><circle cx="42" cy="14" r="24"/><circle cx="42" cy="14" r="18"/><circle cx="42" cy="14" r="12"/><circle cx="42" cy="14" r="6"/></g></svg>');
+      border-bottom: 3px solid #c084fc;
+    }
+    /* 紫色金屬光澤底部飾條 */
+    .wavy-bottom { 
+      width: 100%; height: 24px; 
+      background-color: #ddd6fe; 
+      border-top: 2px solid #a78bfa;
+      background-image: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.35) 40px, rgba(255,255,255,0.35) 80px);
+    }
+    .main-content { background-color: var(--container-bg); padding: 25px 40px 40px 40px; }
+    @media (max-width: 768px) { .app-wrapper { margin: 10px; } .main-content { padding: 15px 20px 30px 20px; } .bg-illustration { display: none; } }
+    .app-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 25px; border-bottom: 2px solid #ede9fe; padding-bottom: 18px; position: relative; }
+    .app-header::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 120px; height: 2px; background: var(--primary); }
+    .app-title { font-size: 1.9rem; margin: 0; color: var(--primary-light); letter-spacing: 2px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .app-nav { display: flex; gap: 12px; flex-grow: 1; justify-content: center; overflow-x: auto; white-space: nowrap; margin-top: 15px; }
+    .nav-item { padding: 9px 22px; cursor: pointer; font-weight: 700; color: #5b21b6; background: #faf5ff; border-radius: 6px; transition: 0.25s; font-size: 11pt; border: 1px solid #ddd6fe; letter-spacing: 1px; }
+    .nav-item:hover { background: #ede9fe; color: var(--primary-light); }
+    .nav-item.active { background: var(--primary); color: white; border-color: var(--primary-light); box-shadow: 0 3px 8px rgba(109, 40, 217, 0.28); }
+    .nav-item.admin-nav { background: #f3e8ff; color: var(--admin-purple); display: none; border-color: #c4b5fd; }
     .nav-item.admin-nav.active { background: var(--admin-purple); color: white; border-color: var(--admin-purple); }
-    .header-user { font-size: 11pt; color: #fff; background: var(--primary-light); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
-    .btn-logout { background: #ffccd5; border: 1px solid #ffb3c1; color: #c9184a; font-weight: bold; cursor: pointer; padding: 4px 10px; border-radius: 15px; font-size: 10pt; transition: 0.2s; }
-    .btn-logout:hover { background: #ffb3c1; }
-    .view-section { display: none; animation: fadeIn 0.4s ease; }
+    .header-user { font-size: 10.5pt; color: #fff; background: var(--primary-light); padding: 7px 16px; border-radius: 6px; display: flex; align-items: center; gap: 12px; font-weight: 500; border: 1px solid #3b0764; letter-spacing: 0.5px; }
+    .btn-logout { background: #fff1f2; border: 1px solid #fecdd3; color: var(--danger); font-weight: bold; cursor: pointer; padding: 4px 12px; border-radius: 4px; font-size: 9.5pt; transition: 0.2s; }
+    .btn-logout:hover { background: #ffe4e6; }
+    .view-section { display: none; animation: fadeIn 0.35s ease; }
     .view-section.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .booking-controls { display:grid; grid-template-columns: 1fr 1fr; gap:15px; background: #f1fafa; padding:20px; border-radius:15px; margin-bottom:20px; border: 2px solid #caf0f8; }
-    .booking-controls label { font-weight: 700; color: var(--primary); font-size: 11pt; }
-    .booking-controls input, .booking-controls select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #caf0f8; margin-top: 8px; box-sizing: border-box; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 11pt; color: var(--primary); }
-    .locked-input { opacity: 0.7; cursor: not-allowed !important; background-color: #f8f9fa !important; }
-    .proxy-alert { display:none; background: #fff9c4; color:#f57f17; padding:15px; border-radius:12px; margin-bottom:20px; font-weight:bold; align-items: center; gap: 10px; border: 2px dashed #fbc02d; }
-    .daily-board { background: #f1f8e9; border: 2px dashed #aed581; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-    .daily-board h3 { margin: 0 0 15px 0; color: #558b2f; font-size: 13pt; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .booking-controls { display:grid; grid-template-columns: 1fr 1fr; gap:18px; background: #faf5ff; padding:20px; border-radius:8px; margin-bottom:20px; border: 1px solid #ddd6fe; border-left: 5px solid var(--primary); }
+    .booking-controls label { font-weight: 700; color: var(--primary-light); font-size: 11pt; letter-spacing: 0.5px; }
+    .booking-controls input, .booking-controls select { width: 100%; padding: 11px 12px; border-radius: 6px; border: 1px solid #c4b5fd; margin-top: 8px; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; font-weight: 500; font-size: 11pt; color: var(--text-dark); background: #fff; }
+    .booking-controls input:focus, .booking-controls select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.18); }
+    .locked-input { opacity: 0.7; cursor: not-allowed !important; background-color: #f3e8ff !important; }
+    .proxy-alert { display:none; background: #fef9e7; color:#9a6700; padding:14px 18px; border-radius:8px; margin-bottom:20px; font-weight:bold; align-items: center; gap: 10px; border: 1px solid #f5d76e; border-left: 5px solid #d4a017; }
+    .daily-board { background: #faf5ff; border: 1px solid #ddd6fe; border-top: 3px solid var(--primary); padding: 18px 20px; border-radius: 8px; margin-bottom: 20px; }
+    .daily-board h3 { margin: 0 0 12px 0; color: var(--primary-light); font-size: 12.5pt; }
     .daily-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-    .daily-tag { background: white; border: 2px solid #8bc34a; color: #33691e; padding: 6px 12px; border-radius: 20px; font-size: 10pt; font-weight: bold; }
-    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; table-layout: fixed; background: white; border-radius: 12px; overflow: hidden; border: 2px solid #caf0f8; }
-    th, td { padding: 15px 8px; text-align: center; border-bottom: 1px solid #e0fbfc; border-right: 1px solid #e0fbfc; }
-    th { background: #f1fafa; color: var(--primary); line-height: 1.4; font-weight: 700; font-size: 12pt; border-bottom: 2px solid #caf0f8; } 
+    .daily-tag { background: white; border: 1px solid #a78bfa; color: var(--primary-light); padding: 5px 12px; border-radius: 4px; font-size: 10pt; font-weight: bold; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; table-layout: fixed; background: white; border-radius: 8px; overflow: hidden; border: 1px solid #c4b5fd; }
+    th, td { padding: 14px 8px; text-align: center; border-bottom: 1px solid #ede9fe; border-right: 1px solid #ede9fe; }
+    th { background: #f3e8ff; color: var(--primary-light); line-height: 1.4; font-weight: 700; font-size: 11.5pt; border-bottom: 2px solid #c4b5fd; } 
     th:last-child, td:last-child { border-right: none; }
     tr:last-child td { border-bottom: none; }
-    .skeleton { background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); background-size: 200% 100%; animation: 1.5s shine linear infinite; border-radius:8px; height: 35px; }
+    .skeleton { background: linear-gradient(110deg, #ede9fe 8%, #faf5ff 18%, #ede9fe 33%); background-size: 200% 100%; animation: 1.5s shine linear infinite; border-radius:6px; height: 35px; }
     @keyframes shine { to { background-position-x: -200%; } }
-    .btn-book { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; width: 90%; font-weight: bold; transition: 0.2s; }
-    .btn-book:hover { transform: translateY(-2px); filter: brightness(1.1); }
-    .cell-mine { color: white; font-weight: bold; background: var(--primary); padding: 6px; border: 2px solid var(--primary-light); width: 90%; display:inline-block; border-radius: 8px; }
-    .cell-booked { color: #fff; font-weight: bold; background: var(--danger); padding: 6px; width: 90%; display:inline-block; border-radius: 8px; }
-    .cell-past { background: var(--past); color: #555; border-radius: 8px; padding: 6px; display: inline-block; width: 90%; font-weight: 600; }
-    .cell-restricted { color: #888; font-size: 10pt; background: #f8f9fa; font-weight: 600; border-radius: 8px; padding: 6px; }
-    .admin-panel { background: var(--admin-bg); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px dashed #94d2bd; }
-    .admin-input { flex: 1 1 auto; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 2px solid #94d2bd; font-size: 11pt; box-sizing: border-box; }
+    .btn-book { background: var(--success); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 90%; font-weight: bold; transition: 0.2s; letter-spacing: 1px; font-family: 'Noto Sans TC', sans-serif; }
+    .btn-book:hover { background: #047857; transform: translateY(-1px); }
+    .cell-mine { color: white; font-weight: bold; background: var(--primary); padding: 6px; border: 1px solid var(--primary-light); width: 90%; display:inline-block; border-radius: 6px; }
+    .cell-booked { color: #fff; font-weight: bold; background: var(--danger); padding: 6px; width: 90%; display:inline-block; border-radius: 6px; }
+    .cell-past { background: #ede9fe; color: #6b7280; border-radius: 6px; padding: 6px; display: inline-block; width: 90%; font-weight: 500; }
+    .cell-restricted { color: #6d28d9; font-size: 10pt; background: #faf5ff; font-weight: 600; border-radius: 6px; padding: 6px; }
+    .admin-panel { background: var(--admin-bg); padding: 18px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c4b5fd; border-left: 5px solid var(--admin-purple); }
+    .admin-input { flex: 1 1 auto; min-width: 0; padding: 10px 12px; border-radius: 6px; border: 1px solid #c4b5fd; font-size: 11pt; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; }
     .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-    .config-card { background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #caf0f8; box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; }
+    .config-card { background: #faf5ff; padding: 20px; border-radius: 8px; border: 1px solid #ddd6fe; border-top: 3px solid var(--primary); box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; }
     @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } }
-    .btn-admin-active { background: var(--admin-purple); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
-    .btn-admin-inactive { background: white; color: var(--admin-purple); border: 2px solid var(--admin-purple); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 3px solid #ebfbfb; padding-bottom: 15px; }
-    .tab { padding: 10px 25px; cursor: pointer; border-radius: 30px; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 2px solid #e2e8f0; transition: 0.3s; }
+    .btn-admin-active { background: var(--admin-purple); color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; transition: 0.2s; }
+    .btn-admin-active:hover { background: var(--primary-light); }
+    .btn-admin-inactive { background: white; color: var(--admin-purple); border: 1px solid var(--admin-purple); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-admin-inactive:hover { background: #ede9fe; }
+    .tabs { display: flex; gap: 12px; margin-bottom: 25px; border-bottom: 2px solid #ede9fe; padding-bottom: 12px; }
+    .tab { padding: 9px 24px; cursor: pointer; border-radius: 6px; font-weight: 700; color: #6d28d9; background: #faf5ff; border: 1px solid #ddd6fe; transition: 0.25s; }
     .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .card { border-left: 8px solid var(--primary); background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0fbfc; }
-    .card.past { border-left-color: var(--gray); background: #f8fafc; }
+    .card { border-left: 6px solid var(--primary); background: #fff; padding: 18px 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(76, 29, 149, 0.05); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #ede9fe; border-right: 1px solid #ede9fe; border-bottom: 1px solid #ede9fe; }
+    .card.past { border-left-color: var(--gray); background: #faf5ff; }
     .card.cancelled { border-left-color: var(--danger); background: #fff5f5; }
-    .btn-cancel { background: white; color: var(--danger); border: 2px solid var(--danger); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-cancel { background: white; color: var(--danger); border: 1px solid var(--danger); padding: 7px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .btn-cancel:hover { background: var(--danger); color: white; }
-    .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 10pt; font-weight: bold; display: inline-block; }
-    .status-cancelled { background: #ffebee; color: var(--danger); border: 1px solid #ffccd5; }
+    .status-badge { padding: 6px 12px; border-radius: 6px; font-size: 10pt; font-weight: bold; display: inline-block; }
+    .status-cancelled { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
     #initialLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease, visibility 0.4s ease; }
-    .loader-box { background: white; padding: 35px 45px; border-radius: 20px; box-shadow: 0 15px 40px rgba(18, 130, 162, 0.18); text-align: center; border-top: 8px solid var(--primary); display: flex; flex-direction: column; align-items: center; gap: 15px; }
-    .spinner { width: 50px; height: 50px; border: 5px solid #caf0f8; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    .loader-box { background: white; padding: 35px 45px; border-radius: 10px; box-shadow: 0 12px 35px rgba(76, 29, 149, 0.16); text-align: center; border-top: 6px solid var(--primary); border: 1px solid #ddd6fe; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+    .spinner { width: 46px; height: 46px; border: 4px solid #ddd6fe; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text { font-size: 13pt; font-weight: bold; color: var(--primary-light); letter-spacing: 1px; }
-    .loader-subtext { font-size: 10pt; color: #6c757d; }
+    .loader-text { font-size: 13pt; font-weight: bold; color: var(--primary-light); letter-spacing: 1.5px; font-family: 'Noto Serif TC', serif; }
+    .loader-subtext { font-size: 10pt; color: #6b7280; }
     #loginOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9998; align-items:center; justify-content:center; }
-    .login-wrapper { position: relative; width: 350px; max-width: 90%; }
-    .login-box { background: var(--container-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(18, 130, 162, 0.2); text-align: center; position: relative; z-index: 10; border-top: 8px solid var(--primary); }
-    .login-box h2 { color: var(--primary); margin-top: 0; margin-bottom: 25px; font-size: 1.8rem; }
-    .login-input { width: 100%; padding: 14px; border: 2px solid #caf0f8; border-radius: 10px; box-sizing: border-box; font-size: 11pt; font-family: 'Nunito', sans-serif; font-weight: 600; color: var(--text-dark); }
-    .login-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(18, 130, 162, 0.2); }
-    .btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 13pt; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); letter-spacing: 1px; }
-    .btn-login:hover { background: var(--primary-light); transform: translateY(-2px); }
-    #alertOverlay, #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100000 !important; backdrop-filter: blur(3px); }
-    #alertModal, #modal, #customModal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:20px; z-index:100001 !important; width:320px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; border-top: 8px solid var(--danger); }
+    .login-wrapper { position: relative; width: 370px; max-width: 90%; }
+    .login-box { background: var(--container-bg); padding: 38px 32px; border-radius: 10px; box-shadow: 0 15px 40px rgba(76, 29, 149, 0.18); text-align: center; position: relative; z-index: 10; border: 1px solid #ddd6fe; border-top: 8px solid var(--primary-light); }
+    .login-box h2 { color: var(--primary-light); margin-top: 0; margin-bottom: 8px; font-size: 1.65rem; letter-spacing: 2px; }
+    .login-subtitle { color: #6d28d9; font-size: 9.5pt; margin-bottom: 24px; letter-spacing: 1px; border-bottom: 1px solid #ede9fe; padding-bottom: 12px; }
+    .login-input { width: 100%; padding: 13px; border: 1px solid #c4b5fd; border-radius: 6px; box-sizing: border-box; font-size: 11pt; font-family: 'Noto Sans TC', sans-serif; font-weight: 500; color: var(--text-dark); background: #fff; }
+    .login-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.18); }
+    .btn-login { width: 100%; background: var(--primary-light); color: white; border: none; padding: 13px; border-radius: 6px; font-weight: bold; font-size: 12pt; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(76, 29, 149, 0.28); letter-spacing: 2px; font-family: 'Noto Sans TC', sans-serif; }
+    .btn-login:hover { background: var(--primary); transform: translateY(-1px); }
+    #alertOverlay, #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(46, 16, 101, 0.55); z-index:100000 !important; backdrop-filter: blur(2px); }
+    #alertModal, #modal, #customModal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:28px; border-radius:10px; z-index:100001 !important; width:330px; box-shadow: 0 20px 45px rgba(46, 16, 101, 0.25); text-align: center; border: 1px solid #ddd6fe; border-top: 6px solid var(--danger); }
     #modal { border-top-color: var(--primary); }
     #customModal { border-top-color: var(--admin-purple); }
-    #alertMessage { font-size: 12pt; font-weight: 700; color: #333; line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
-    .btn-alert { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; font-size: 12pt; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.3); }
-    .confirm-btns { display: flex; gap: 15px; margin-top: 20px; }
-    .btn-cancel-modal, .btn-confirm-modal { padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; flex: 1; transition: 0.2s; border: none; font-size: 11pt; }
-    .btn-cancel-modal { background: #f1f5f9; color: #64748b; }
-    .btn-confirm-modal { background: var(--danger); color: white; box-shadow: 0 4px 10px rgba(217, 4, 41, 0.3); }
-    .modal-input { width: 100%; box-sizing: border-box; padding: 12px; margin-top: 8px; margin-bottom: 20px; border: 2px solid #caf0f8; border-radius: 8px; font-size: 11pt; font-weight: 600; color: var(--primary); }
-    .modal-input-admin { border-color: #94d2bd; color: var(--admin-purple); }
-    .admin-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; overflow-x: auto; white-space: nowrap; }
-    .admin-tab { padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: bold; background: #ebfbfb; color: var(--admin-purple); transition: 0.2s; }
-    .admin-tab.active { background: var(--admin-purple); color: white; }
-    .admin-card { border-left: 5px solid var(--admin-purple); background: #fff; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: block; }
-    .key-group { display: flex; gap: 5px; margin-top: 10px; }
-    .key-btn { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 10pt; font-weight: bold; background: white; color: #666; transition: 0.2s; }
+    #alertMessage { font-size: 11.5pt; font-weight: 700; color: var(--text-dark); line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
+    .btn-alert { background: var(--primary); color: white; border: none; padding: 11px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 12px; width: 100%; font-size: 11.5pt; }
+    .confirm-btns { display: flex; gap: 12px; margin-top: 20px; }
+    .btn-cancel-modal, .btn-confirm-modal { padding: 11px; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; transition: 0.2s; border: none; font-size: 11pt; }
+    .btn-cancel-modal { background: #ede9fe; color: #5b21b6; }
+    .btn-confirm-modal { background: var(--danger); color: white; }
+    .modal-input { width: 100%; box-sizing: border-box; padding: 11px; margin-top: 8px; margin-bottom: 18px; border: 1px solid #c4b5fd; border-radius: 6px; font-size: 11pt; font-weight: 500; color: var(--text-dark); font-family: 'Noto Sans TC', sans-serif; }
+    .modal-input-admin { border-color: #a78bfa; color: var(--admin-purple); }
+    .admin-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #ddd6fe; padding-bottom: 12px; overflow-x: auto; white-space: nowrap; }
+    .admin-tab { padding: 9px 18px; cursor: pointer; border-radius: 6px; font-weight: bold; background: #faf5ff; color: var(--admin-purple); border: 1px solid #ddd6fe; transition: 0.2s; }
+    .admin-tab.active { background: var(--admin-purple); color: white; border-color: var(--admin-purple); }
+    .admin-card { border-left: 5px solid var(--admin-purple); background: #fff; padding: 15px 18px; margin-bottom: 12px; border-radius: 6px; border-top: 1px solid #ede9fe; border-right: 1px solid #ede9fe; border-bottom: 1px solid #ede9fe; display: block; }
+    .key-group { display: flex; gap: 6px; margin-top: 10px; }
+    .key-btn { flex: 1; padding: 8px; border: 1px solid #ddd6fe; border-radius: 5px; cursor: pointer; font-size: 10pt; font-weight: bold; background: white; color: #5b21b6; transition: 0.2s; }
     .key-btn.active-unlent { background: var(--gray); color: white; border-color: var(--gray); }
     .key-btn.active-lent { background: var(--danger); color: white; border-color: var(--danger); }
     .key-btn.active-returned { background: var(--success); color: white; border-color: var(--success); }
     .form-row { margin-bottom: 18px; text-align: left; }
-    .form-row label.title { display: block; font-weight: bold; margin-bottom: 8px; color: #444; font-size: 11pt; }
-    .form-row input[type="date"], .form-row input[type="text"], .form-row select { width: 100%; padding: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 11pt; }
+    .form-row label.title { display: block; font-weight: bold; margin-bottom: 8px; color: var(--primary-light); font-size: 11pt; }
+    .form-row input[type="date"], .form-row input[type="text"], .form-row select { width: 100%; padding: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #c4b5fd; font-size: 11pt; }
     .date-group { display: flex; gap: 10px; align-items: center; }
-    .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
-    .check-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-    .btn-submit { width: 100%; padding: 14px; background: var(--admin-purple); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 12pt; cursor: pointer; transition: 0.2s; }
+    .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 10px; background: #faf5ff; padding: 15px; border-radius: 6px; border: 1px solid #ddd6fe; }
+    .check-item { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .btn-submit { width: 100%; padding: 13px; background: var(--admin-purple); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 11.5pt; cursor: pointer; transition: 0.2s; letter-spacing: 1px; }
+    .btn-submit:hover { background: var(--primary-light); }
   </style>
 </head>
 <body>
@@ -131,41 +169,153 @@
   <div class="loader-box">
     <div class="spinner"></div>
     <div class="loader-text">系統載入中...</div>
-    <div class="loader-subtext">正在連線至雲端資料庫，請稍候 💻</div>
+    <div class="loader-subtext">正在連線至雲端資訊設備資料庫，請稍候 💻</div>
   </div>
 </div>
 
-<div class="bg-illustration" style="top: 8%; left: 5%; width: 110px; height: 150px;">
-  <svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="10" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><rect x="40" y="40" width="40" height="40" rx="8" fill="#38b2ac" opacity="0.8"/><rect x="40" y="90" width="40" height="10" rx="4" fill="#a0aec0" opacity="0.6"/><circle cx="60" cy="148" r="4" fill="#cbd5e0"/></svg>
+<!-- 紫色科技風格背景插圖：電腦、平板與資訊設備 -->
+<!-- 左上：筆記型電腦與無線滑鼠 -->
+<div class="bg-illustration" style="top: 6%; left: 3%; width: 155px; height: 140px;">
+  <svg viewBox="0 0 160 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="15" width="140" height="110" rx="14" fill="#ede9fe" stroke="#6d28d9" stroke-width="3"/>
+    <!-- 筆電螢幕外框與顯示畫面 -->
+    <rect x="28" y="28" width="90" height="58" rx="5" fill="#4c1d95" stroke="#c084fc" stroke-width="2.5"/>
+    <rect x="34" y="34" width="78" height="46" rx="2" fill="#2e1065"/>
+    <!-- 螢幕程式碼與視窗圖形 -->
+    <circle cx="40" cy="40" r="2" fill="#f43f5e"/>
+    <circle cx="46" cy="40" r="2" fill="#fbbf24"/>
+    <circle cx="52" cy="40" r="2" fill="#10b981"/>
+    <line x1="40" y1="50" x2="75" y2="50" stroke="#c4b5fd" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="40" y1="59" x2="96" y2="59" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="46" y1="68" x2="82" y2="68" stroke="#e9d5ff" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- 筆電鍵盤底座 -->
+    <polygon points="20,86 126,86 134,98 12,98" fill="#6d28d9" stroke="#4c1d95" stroke-width="2"/>
+    <rect x="63" y="89" width="20" height="4" rx="1.5" fill="#ddd6fe"/>
+    <!-- 無線滑鼠 -->
+    <rect x="128" y="72" width="16" height="24" rx="8" fill="#ffffff" stroke="#4c1d95" stroke-width="2.2"/>
+    <line x1="136" y1="74" x2="136" y2="81" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"/>
+  </svg>
 </div>
-<div class="bg-illustration" style="top: 15%; right: 8%; width: 150px; height: 110px; transform: rotate(15deg);">
-  <svg viewBox="0 0 160 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="140" height="100" rx="8" fill="#f1f5f9"/><rect x="15" y="15" width="130" height="90" fill="#0077b6"/><rect x="25" y="25" width="15" height="15" rx="3" fill="#ffffff"/><rect x="50" y="25" width="15" height="15" rx="3" fill="#ff4d6d"/><rect x="75" y="25" width="15" height="15" rx="3" fill="#06d6a0"/><rect x="100" y="25" width="15" height="15" rx="3" fill="#ffd166"/><line x1="10" y1="60" x2="15" y2="60" stroke="#94a3b8" stroke-width="2"/></svg>
+
+<!-- 右上：iPad 平板電腦、觸控筆與充電推車概念 -->
+<div class="bg-illustration" style="top: 8%; right: 3%; width: 155px; height: 145px;">
+  <svg viewBox="0 0 160 150" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="80" cy="75" r="66" fill="#ede9fe" stroke="#6d28d9" stroke-width="3"/>
+    <!-- 後方橫向平板 -->
+    <rect x="46" y="34" width="84" height="58" rx="7" fill="#7c3aed" stroke="#4c1d95" stroke-width="2.5"/>
+    <rect x="52" y="40" width="72" height="46" rx="3" fill="#f5f3ff"/>
+    <!-- 前方直向 iPad 平板 -->
+    <rect x="30" y="46" width="56" height="74" rx="7" fill="#4c1d95" stroke="#c084fc" stroke-width="2.5"/>
+    <rect x="35" y="53" width="46" height="56" rx="2" fill="#ffffff"/>
+    <!-- 平板內 App 圖示網格 -->
+    <rect x="41" y="59" width="9" height="9" rx="2" fill="#8b5cf6"/>
+    <rect x="54" y="59" width="9" height="9" rx="2" fill="#c084fc"/>
+    <rect x="67" y="59" width="9" height="9" rx="2" fill="#6d28d9"/>
+    <rect x="41" y="72" width="9" height="9" rx="2" fill="#a78bfa"/>
+    <rect x="54" y="72" width="9" height="9" rx="2" fill="#7c3aed"/>
+    <rect x="67" y="72" width="9" height="9" rx="2" fill="#ddd6fe"/>
+    <line x1="41" y1="90" x2="75" y2="90" stroke="#c4b5fd" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="41" y1="98" x2="64" y2="98" stroke="#ddd6fe" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Home 鍵 -->
+    <circle cx="58" cy="114.5" r="2.5" fill="#ddd6fe"/>
+    <!-- 觸控筆 Stylus -->
+    <line x1="94" y1="112" x2="128" y2="66" stroke="#4c1d95" stroke-width="5" stroke-linecap="round"/>
+    <line x1="94" y1="112" x2="98" y2="106" stroke="#f43f5e" stroke-width="5" stroke-linecap="round"/>
+  </svg>
 </div>
-<div class="bg-illustration" style="bottom: 12%; left: 8%; width: 140px; height: 140px; transform: rotate(-10deg);">
-  <svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/><ellipse cx="123" cy="36" rx="4" ry="6" fill="#023e8a" transform="rotate(35 123 36)"/></svg>
+
+<!-- 左下：高速無線網路路由器、雲端伺服器與平板充電櫃 -->
+<div class="bg-illustration" style="bottom: 8%; left: 3%; width: 155px; height: 135px;">
+  <svg viewBox="0 0 160 135" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <!-- 平板充電車機櫃底座 -->
+    <rect x="26" y="68" width="108" height="46" rx="7" fill="#4c1d95" stroke="#6d28d9" stroke-width="2.5"/>
+    <rect x="34" y="75" width="92" height="13" rx="3" fill="#2e1065"/>
+    <rect x="34" y="93" width="92" height="13" rx="3" fill="#2e1065"/>
+    <!-- 機櫃狀態指示燈 -->
+    <circle cx="44" cy="81.5" r="3" fill="#34d399"/>
+    <circle cx="55" cy="81.5" r="3" fill="#34d399"/>
+    <circle cx="66" cy="81.5" r="3" fill="#a78bfa"/>
+    <line x1="88" y1="81.5" x2="116" y2="81.5" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="44" cy="99.5" r="3" fill="#34d399"/>
+    <circle cx="55" cy="99.5" r="3" fill="#c084fc"/>
+    <circle cx="66" cy="99.5" r="3" fill="#34d399"/>
+    <line x1="88" y1="99.5" x2="116" y2="99.5" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- 雙天線與 Wi-Fi 訊號波 -->
+    <line x1="48" y1="68" x2="40" y2="38" stroke="#4c1d95" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="112" y1="68" x2="120" y2="38" stroke="#4c1d95" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M 66 48 Q 80 36 94 48" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+    <path d="M 56 37 Q 80 20 104 37" fill="none" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+    <path d="M 46 26 Q 80 4 114 26" fill="none" stroke="#c084fc" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="80" cy="56" r="4" fill="#6d28d9"/>
+  </svg>
 </div>
-<div class="bg-illustration" style="bottom: 18%; right: 6%; width: 150px; height: 110px;">
-  <svg viewBox="0 0 160 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><polygon points="10,110 30,30 150,30 130,110" fill="#03045e"/><rect x="25" y="35" width="115" height="70" rx="3" fill="#fca311" transform="skewX(-14)"/><rect x="50" y="45" width="60" height="40" rx="2" fill="#ffffff" transform="skewX(-14)"/><path d="M 60 70 Q 75 45 90 70 T 110 50" fill="none" stroke="#14213d" stroke-width="3" stroke-linecap="round" transform="skewX(-14)"/><line x1="140" y1="20" x2="105" y2="75" stroke="#e5e5e5" stroke-width="5" stroke-linecap="round"/><rect x="35" y="90" width="8" height="8" rx="2" fill="#00b4d8" transform="skewX(-14)"/><rect x="48" y="90" width="8" height="8" rx="2" fill="#ef233c" transform="skewX(-14)"/><rect x="61" y="90" width="8" height="8" rx="2" fill="#ffb703" transform="skewX(-14)"/></svg>
+
+<!-- 右下：桌上型電腦螢幕、單槍投影機與數位教學看板 -->
+<div class="bg-illustration" style="bottom: 8%; right: 3%; width: 155px; height: 135px;">
+  <svg viewBox="0 0 160 135" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <!-- 電腦大螢幕與數位看板 -->
+    <rect x="22" y="16" width="116" height="72" rx="7" fill="#4c1d95" stroke="#6d28d9" stroke-width="3"/>
+    <rect x="29" y="23" width="102" height="58" rx="3" fill="#faf5ff"/>
+    <!-- 螢幕內的圓餅圖與數據分析條 -->
+    <circle cx="54" cy="52" r="16" fill="#ddd6fe" stroke="#6d28d9" stroke-width="2"/>
+    <path d="M 54 52 L 54 36 A 16 16 0 0 1 70 52 Z" fill="#8b5cf6"/>
+    <rect x="80" y="36" width="38" height="6" rx="3" fill="#6d28d9"/>
+    <rect x="80" y="48" width="28" height="6" rx="3" fill="#8b5cf6"/>
+    <rect x="80" y="60" width="42" height="6" rx="3" fill="#c084fc"/>
+    <!-- 螢幕支架與底座 -->
+    <rect x="70" y="88" width="20" height="16" fill="#6d28d9"/>
+    <rect x="48" y="104" width="64" height="7" rx="3.5" fill="#4c1d95"/>
+    <!-- 前方迷你單槍投影機鏡頭 -->
+    <rect x="102" y="92" width="42" height="22" rx="5" fill="#ede9fe" stroke="#4c1d95" stroke-width="2.2"/>
+    <circle cx="115" cy="103" r="6" fill="#6d28d9" stroke="#c084fc" stroke-width="2"/>
+    <line x1="126" y1="100" x2="136" y2="100" stroke="#4c1d95" stroke-width="2"/>
+    <line x1="126" y1="106" x2="136" y2="106" stroke="#4c1d95" stroke-width="2"/>
+  </svg>
 </div>
 
 <div id="loginOverlay">
-  <div class="bg-illustration" style="top: 10%; left: 10%; width: 150px; height: 150px;"><svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="100" height="120" rx="6" fill="#0096c7"/><rect x="35" y="25" width="90" height="110" fill="#ffffff"/><circle cx="70" cy="60" r="25" fill="#ef476f" opacity="0.8"/><circle cx="90" cy="90" r="30" fill="#118ab2" opacity="0.7"/><path d="M 120 40 L 70 110" stroke="#023e8a" stroke-width="6" stroke-linecap="round"/></svg></div>
-  <div class="bg-illustration" style="bottom: 15%; right: 10%; width: 140px; height: 140px; transform: rotate(-20deg);"><svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="140" rx="8" fill="#2d3748"/><rect x="15" y="20" width="90" height="120" fill="#f8fafc"/><circle cx="60" cy="70" r="30" fill="#38b2ac" opacity="0.6"/><circle cx="80" cy="90" r="25" fill="#ed8936" opacity="0.6"/><circle cx="40" cy="100" r="20" fill="#ecc94b" opacity="0.6"/></svg></div>
+  <!-- 登入畫面左上：筆記型電腦與程式碼 -->
+  <div class="bg-illustration" style="top: 10%; left: 7%; width: 150px; height: 135px;">
+    <svg viewBox="0 0 160 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="15" width="140" height="110" rx="14" fill="#ede9fe" stroke="#6d28d9" stroke-width="3"/>
+      <rect x="28" y="28" width="104" height="60" rx="5" fill="#4c1d95" stroke="#c084fc" stroke-width="2.5"/>
+      <line x1="42" y1="46" x2="96" y2="46" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="42" y1="60" x2="80" y2="60" stroke="#ddd6fe" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="42" y1="72" x2="110" y2="72" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+      <polygon points="18,88 142,88 148,100 12,100" fill="#6d28d9"/>
+      <rect x="68" y="91" width="24" height="4" rx="1.5" fill="#e9d5ff"/>
+    </svg>
+  </div>
+  <!-- 登入畫面右下：平板電腦與觸控筆 -->
+  <div class="bg-illustration" style="bottom: 10%; right: 7%; width: 150px; height: 140px;">
+    <svg viewBox="0 0 160 150" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="80" cy="75" r="64" fill="#ede9fe" stroke="#6d28d9" stroke-width="3"/>
+      <rect x="44" y="30" width="64" height="88" rx="8" fill="#4c1d95" stroke="#c084fc" stroke-width="2.5"/>
+      <rect x="50" y="38" width="52" height="68" rx="3" fill="#ffffff"/>
+      <rect x="57" y="46" width="14" height="14" rx="3" fill="#8b5cf6"/>
+      <rect x="77" y="46" width="14" height="14" rx="3" fill="#c084fc"/>
+      <line x1="57" y1="72" x2="94" y2="72" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+      <line x1="57" y1="84" x2="82" y2="84" stroke="#ddd6fe" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="76" cy="112" r="3" fill="#ddd6fe"/>
+      <line x1="96" y1="106" x2="128" y2="56" stroke="#6d28d9" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+  </div>
 
   <div class="login-wrapper">
     <div class="login-box">
-      <h2>設備預約登入</h2>
+      <h2>資訊設備預約系統</h2>
+      <div class="login-subtitle">電腦、平板設備與專科教室借用平台</div>
       <label for="loginNameSelect" style="display:none;">選擇您的姓名</label>
       <select id="loginNameSelect" class="login-input" style="margin-bottom: 15px;" aria-label="選擇您的姓名" autocomplete="username">
         <option value="">載入名單中...</option>
       </select>
       <label for="loginPinInput" style="display:none;">請輸入密碼</label>
-      <input type="password" id="loginPinInput" class="login-input" placeholder="請輸入密碼" style="margin-bottom: 10px;" aria-label="請輸入密碼" autocomplete="current-password">
-      <div style="font-size: 10pt; color: #555; text-align: left; margin-bottom: 25px; line-height: 1.5; background: #e0fbfc; padding: 12px; border-radius: 10px; border: 2px dashed #caf0f8; font-weight: 600;">
+      <input type="password" id="loginPinInput" class="login-input" placeholder="請輸入登入密碼" style="margin-bottom: 12px;" aria-label="請輸入密碼" autocomplete="current-password">
+      <div style="font-size: 10pt; color: #3b0764; text-align: left; margin-bottom: 22px; line-height: 1.6; background: #faf5ff; padding: 12px 14px; border-radius: 6px; border-left: 4px solid var(--primary); font-weight: 500;">
         💡 請選擇您的姓名，並輸入密碼登入。<br>
-        <span style="font-size: 9pt; color: #888;">(若無特別修改，預設密碼通常為帳號前綴)</span>
+        <span style="font-size: 9pt; color: #6d28d9;">(若無特別修改，預設密碼通常為帳號前綴)</span>
       </div>
-      <button id="btnLoginSubmit" class="btn-login" onclick="window.doLogin()">Login 登入</button>
+      <button id="btnLoginSubmit" class="btn-login" onclick="window.doLogin()">登入系統</button>
     </div>
   </div>
 </div>
@@ -175,98 +325,102 @@
     <div class="wavy-top"></div>
     <div class="main-content">
       <div class="app-header">
-        <h1 class="app-title">Ipad Equipment 💻</h1>
+        <h1 class="app-title">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" fill="#ede9fe"></rect>
+            <line x1="2" y1="20" x2="22" y2="20"></line>
+            <line x1="12" y1="17" x2="12" y2="20"></line>
+          </svg>
+          教學設備與專科教室預約
+        </h1>
         <div class="header-user">
           <span id="displayUserName">使用者</span>
           <button class="btn-logout" onclick="window.doLogout(false)">登出</button>
         </div>
         <div class="app-nav" style="width: 100%;">
-          <div class="nav-item active" onclick="window.switchAppView('booking')" id="nav-booking">📝 我要預約</div>
+          <div class="nav-item active" onclick="window.switchAppView('booking')" id="nav-booking">💻 我要預約</div>
           <div class="nav-item" onclick="window.switchAppView('myrecords')" id="nav-myrecords">👤 我的紀錄</div>
           <div class="nav-item admin-nav" onclick="window.switchAppView('admin')" id="nav-admin">⚙️ 管理後台</div>
         </div>
       </div>
 
+      <!-- 代理模式橫幅 -->
       <div id="proxyAlert" class="proxy-alert">
-        <span style="font-size: 1.5rem;">🔄</span>
-        <span><b>代理模式：</b>您正以「<span id="proxyCurrentName" style="color:#d35400; text-decoration:underline;"></span>」身分操作。</span>
+        <span>🕵️ 目前為「代客操作模式」，身分為：<b id="proxyCurrentName" style="text-decoration:underline;"></b></span>
+        <button onclick="window.resetUserProxy()" style="margin-left:auto; background:#d4a017; color:white; border:none; padding:5px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">結束代理</button>
       </div>
 
+      <!-- 頁籤 1：我要預約 -->
       <div id="view-booking" class="view-section active">
         <div id="adminPanel" class="admin-panel" style="display:none;">
-          <h3>👨‍💻 代客預約 / 身分切換</h3>
-          <div class="admin-controls" style="display:flex; gap:10px;">
-            <label for="adminSwitchName" style="display:none;">選擇要切換代理的使用者</label>
-            <select id="adminSwitchName" class="admin-input" aria-label="選擇要切換代理的使用者"></select>
-            <button id="btnSwitch" class="btn-admin-active" onclick="window.switchUserProxy()">切換</button>
-            <button id="btnReset" class="btn-admin-inactive" onclick="window.resetUserProxy()">還原本人</button>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <label for="adminSwitchName" style="font-weight:bold; color:var(--admin-purple);">👨‍💻 管理員代客預約：</label>
+            <select id="adminSwitchName" class="admin-input" style="max-width:220px;" onchange="window.switchUserProxy()"></select>
+            <span style="font-size:9.5pt; color:#6d28d9;">(切換後可直接代替該老師進行預約或取消)</span>
           </div>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-          <h2 style="margin:0;">選擇借用時段 <span id="syncTag" style="font-size:11pt; color:var(--primary); font-weight:bold;"></span></h2>
-        </div>
-
-        <div id="dailyBoard" class="daily-board" style="display:none;"></div>
 
         <div class="booking-controls">
           <div>
-            <label for="targetDate">📅 借用日期</label>
+            <label for="targetDate">📅 借用日期 <span id="syncTag" style="font-size:9.5pt; color:var(--accent-blue); font-weight:normal;"></span></label>
             <input type="date" id="targetDate" onchange="window.refreshBooking()">
           </div>
           <div>
-            <label for="itemSelect">💻 選擇設備/教室</label>
+            <label for="itemSelect">💻 選擇ipad充電車</label>
             <select id="itemSelect" onchange="window.refreshBooking()"></select>
           </div>
         </div>
+
+        <div id="dailyBoard" class="daily-board" style="display:none;"></div>
         <div id="tableBox" style="overflow-x:auto;"></div>
       </div>
 
+      <!-- 頁籤 2：我的紀錄 -->
       <div id="view-myrecords" class="view-section">
-        <h2 style="margin-top: 0; margin-bottom: 25px;">預約清單</h2>
         <div class="tabs">
-          <div id="tab-upcoming" class="tab active" onclick="window.switchSubTab('upcoming')">即將到來</div>
-          <div id="tab-past" class="tab" onclick="window.switchSubTab('past')">歷史紀錄</div>
+          <div id="tab-upcoming" class="tab active" onclick="window.switchSubTab('upcoming')">⏳ 即將到來</div>
+          <div id="tab-past" class="tab" onclick="window.switchSubTab('past')">📁 歷史與已取消</div>
         </div>
         <div id="list-upcoming"></div>
-        <div id="list-past" style="display: none;"></div>
+        <div id="list-past" style="display:none;"></div>
       </div>
 
+      <!-- 頁籤 3：管理後台 -->
       <div id="view-admin" class="view-section">
-        <h2 style="color:var(--admin-purple); margin-top:0;">👨‍💻 管理員看板</h2>
         <div class="admin-tabs">
-          <div id="admin-t1" class="admin-tab active" onclick="window.switchAdminTab(1)">每日借用動態</div>
-          <div id="admin-t2" class="admin-tab" onclick="window.switchAdminTab(2)">⚙️ 批次禁借設定</div>
-          <div id="admin-t3" class="admin-tab" onclick="window.switchAdminTab(3)">📊 統計圖表</div>
-          <div id="admin-t4" class="admin-tab" onclick="window.switchAdminTab(4)">👥 帳號管理</div>
-          <div id="admin-t5" class="admin-tab" onclick="window.switchAdminTab(5)">🛠️ 設備、班級與節次設定</div>
+          <div id="admin-t1" class="admin-tab active" onclick="window.switchAdminTab(1)">📋 每日借用與設備狀態</div>
+          <div id="admin-t2" class="admin-tab" onclick="window.switchAdminTab(2)">🔒 批次禁借設定</div>
+          <div id="admin-t3" class="admin-tab" onclick="window.switchAdminTab(3)">📊 借用統計圖表</div>
+          <div id="admin-t4" class="admin-tab" onclick="window.switchAdminTab(4)">👥 帳號與權限管理</div>
+          <div id="admin-t5" class="admin-tab" onclick="window.switchAdminTab(5)">🛠️ ipad充電車、班級與節次設定</div>
+          <div id="admin-t6" class="admin-tab" onclick="window.switchAdminTab(6)">📑 每月預約報表</div>
         </div>
 
         <div id="admin-page1">
-          <div style="background:#e0fbfc; padding:20px; border-radius:12px; margin-bottom:15px; display:flex; gap:15px; align-items:center;">
-            <label for="adminDate" style="font-weight:bold;">📅 查看日期</label>
-            <input type="date" id="adminDate" onchange="window.loadAdminDaily()" style="padding:10px; border-radius:8px; border:1px solid #94d2bd; flex-grow:1; max-width:250px;">
+          <div style="margin-bottom:15px; display:flex; align-items:center; gap:10px; background:#faf5ff; padding:12px 16px; border-radius:8px; border:1px solid #ddd6fe;">
+            <label for="adminDate" style="font-weight:bold; color:var(--admin-purple);">📅 查詢日期：</label>
+            <input type="date" id="adminDate" class="admin-input" style="max-width:200px;" onchange="window.loadAdminDaily()">
           </div>
           <div id="adminDailyList"></div>
         </div>
 
         <div id="admin-page2" style="display:none;">
           <div class="form-row">
-            <label class="title" for="resItem">🚫 選擇禁借設備/教室</label>
-            <select id="resItem" class="admin-input"></select>
+            <label class="title" for="resItem">💻 選擇禁借ipad充電車</label>
+            <select id="resItem"></select>
           </div>
           <div class="form-row">
-            <div class="title" id="resDateGroupLabel">📅 影響日期範圍</div>
-            <div class="date-group" aria-labelledby="resDateGroupLabel">
-              <label for="resStartDate" style="display:none;">禁借開始日期</label>
-              <input type="date" id="resStartDate" class="admin-input" aria-label="禁借開始日期"> 
-              <span style="font-weight:bold; color:#777;">至</span> 
-              <label for="resEndDate" style="display:none;">禁借結束日期</label>
-              <input type="date" id="resEndDate" class="admin-input" aria-label="禁借結束日期">
+            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: var(--primary-light); font-size: 11pt;">📅 日期範圍</div>
+            <div class="date-group">
+              <label for="resStartDate" style="display:none;">開始日期</label>
+              <input type="date" id="resStartDate" aria-label="開始日期">
+              <span>至</span>
+              <label for="resEndDate" style="display:none;">結束日期</label>
+              <input type="date" id="resEndDate" aria-label="結束日期">
             </div>
           </div>
           <div class="form-row">
-            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: #444; font-size: 11pt;">📌 適用星期 (可複選)</div>
+            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: var(--primary-light); font-size: 11pt;">📌 適用星期 (可複選)</div>
             <div class="check-grid" id="dayChecks">
               <label class="check-item"><input type="checkbox" name="dCheck" value="1" checked> 週一</label>
               <label class="check-item"><input type="checkbox" name="dCheck" value="2" checked> 週二</label>
@@ -278,25 +432,25 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: #444; font-size: 11pt;">⏱️ 禁借節次 (可複選)</div>
+            <div class="title" style="font-weight: bold; margin-bottom: 8px; color: var(--primary-light); font-size: 11pt;">⏱️ 禁借節次 (可複選)</div>
             <div id="periodChecks" class="check-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));"></div>
           </div>
           <div class="form-row">
             <label class="title" for="resNote">📝 備註原因</label>
-            <input type="text" id="resNote" class="admin-input" placeholder="例如：設備維修中、期末盤點...">
+            <input type="text" id="resNote" class="admin-input" placeholder="例如：平板系統更新、設備維修中、期末盤點...">
           </div>
           <button id="resSubmitBtn" class="btn-submit" onclick="window.submitRestrict()">確認並寫入設定</button>
         </div>
 
         <div id="admin-page3" style="display:none;">
-          <div style="position: relative; height: 350px; width: 100%; background:white; padding:20px; border-radius:10px; border: 1px solid #94d2bd;">
+          <div style="position: relative; height: 350px; width: 100%; background:white; padding:20px; border-radius:10px; border: 1px solid #c4b5fd;">
             <canvas id="myChart"></canvas>
           </div>
         </div>
 
         <div id="admin-page4" style="display:none;">
-          <div style="margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px dashed #d4a373;">
-            <button onclick="window.promptChangeAdminPassword()" class="btn-admin-inactive" style="border-color: #d4a373; color: #d35400;">🔑 修改我的登入密碼</button>
+          <div style="margin-bottom: 20px; background: #faf5ff; padding: 15px; border-radius: 10px; border: 1px dashed #a78bfa;">
+            <button onclick="window.promptChangeAdminPassword()" class="btn-admin-inactive" style="border-color: #7c3aed; color: #5b21b6;">🔑 修改我的登入密碼</button>
           </div>
           <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap: wrap;">
              <button onclick="window.openAddUserModal()" class="btn-admin-active">➕ 手動新增帳號</button>
@@ -305,8 +459,8 @@
                <input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display:none;" onchange="window.importExcel(event)">
              </label>
           </div>
-          <div style="font-size: 10pt; color: #78909c; margin-bottom: 10px; line-height: 1.5;">
-             ※ 批次匯入 Excel 支援多種欄位名稱：系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 。若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
+          <div style="font-size: 10pt; color: #6d28d9; margin-bottom: 10px; line-height: 1.5;">
+             ※ 批次匯入 Excel 支援多種欄位名稱：系統會自動尋找 <b>「姓名」</b> 欄位。密碼則會尋找 <b>「密碼」</b> 或預設為 123456。若包含 <b>「權限」</b> 欄位且內容為 "管理員"，則該帳號具備後台權限。
           </div>
           <div id="userTableContainer" style="overflow-x:auto;"></div>
         </div>
@@ -314,10 +468,10 @@
         <div id="admin-page5" style="display:none;">
           <div class="config-grid">
             <div class="config-card">
-              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">💻 設備 / 專科教室清單</h3>
+              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">💻 ipad充電車清單</h3>
               <div style="display:flex; gap:8px; margin-bottom:15px; width:100%; align-items:stretch;">
-                <label for="newItemInput" style="display:none;">輸入新設備或教室名稱</label>
-                <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新設備或教室名稱..." aria-label="輸入新設備或教室名稱">
+                <label for="newItemInput" style="display:none;">輸入新ipad充電車名稱</label>
+                <input type="text" id="newItemInput" class="admin-input" placeholder="輸入新ipad充電車名稱..." aria-label="輸入新設備或教室名稱">
                 <button class="btn-admin-active" onclick="window.addItemConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="itemsListContainer" style="display:flex; flex-direction:column; gap:8px; height:360px; overflow-y:auto; padding-right:4px;"></div>
@@ -335,14 +489,14 @@
 
             <div class="config-card" style="grid-column: 1 / -1;">
               <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">⏱️ 節次與上下課時間設定</h3>
-              <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+              <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid #ede9fe;">
                 <label for="newPeriodName" style="display:none;">新節次名稱</label>
                 <input type="text" id="newPeriodName" class="admin-input" placeholder="節次名稱 (如: 早自習、第八節)" style="flex: 1 1 160px;" aria-label="新節次名稱">
                 <div style="display:flex; align-items:center; gap:6px; flex: 1 1 240px;">
-                  <span style="font-weight:bold; color:#555; font-size:10pt; white-space:nowrap;">時間：</span>
+                  <span style="font-weight:bold; color:#4c1d95; font-size:10pt; white-space:nowrap;">時間：</span>
                   <label for="newPeriodStart" style="display:none;">開始時間</label>
                   <input type="time" id="newPeriodStart" class="admin-input" value="08:10" style="padding:9px;" aria-label="開始時間">
-                  <span style="font-weight:bold; color:#777;">至</span>
+                  <span style="font-weight:bold; color:#6d28d9;">至</span>
                   <label for="newPeriodEnd" style="display:none;">結束時間</label>
                   <input type="time" id="newPeriodEnd" class="admin-input" value="09:00" style="padding:9px;" aria-label="結束時間">
                 </div>
@@ -351,6 +505,34 @@
               <div id="periodsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; padding-right:4px;"></div>
             </div>
           </div>
+        </div>
+
+        <div id="admin-page6" style="display:none;">
+          <div style="margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#faf5ff; padding:15px 18px; border-radius:8px; border:1px solid #ddd6fe;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="reportMonth" style="font-weight:bold; color:var(--admin-purple); white-space:nowrap;">📅 選擇月份：</label>
+              <input type="month" id="reportMonth" class="admin-input" style="max-width:170px;" onchange="window.loadMonthlyReport()">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="reportItemFilter" style="font-weight:bold; color:var(--admin-purple); white-space:nowrap;">💻 設備篩選：</label>
+              <select id="reportItemFilter" class="admin-input" style="max-width:220px;" onchange="window.loadMonthlyReport()">
+                <option value="ALL">全部設備 / 專科教室</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="reportStatusFilter" style="font-weight:bold; color:var(--admin-purple); white-space:nowrap;">📌 狀態：</label>
+              <select id="reportStatusFilter" class="admin-input" style="max-width:150px;" onchange="window.loadMonthlyReport()">
+                <option value="VALID">僅顯示有效預約</option>
+                <option value="ALL">包含已取消紀錄</option>
+              </select>
+            </div>
+            <button class="btn-admin-active" style="margin-left:auto; background:var(--success); display:flex; align-items:center; gap:6px;" onclick="window.exportMonthlyReportExcel()">
+              📥 匯出 Excel 報表
+            </button>
+          </div>
+
+          <div id="monthlySummaryCards" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px;"></div>
+          <div id="monthlyReportContainer" style="overflow-x:auto;"></div>
         </div>
       </div>
     </div>
@@ -361,9 +543,9 @@
 <div id="overlay" onclick="window.closeModal()"></div>
 <div id="modal">
   <h3 style="color:var(--primary); margin-top:0;">確認預約</h3>
-  <div id="confirmDetail" style="font-size:11pt; background:#e0fbfc; padding:15px; border-radius:10px; margin-bottom:20px; line-height:1.6; border: 2px dashed #caf0f8; color: var(--primary);"></div>
+  <div id="confirmDetail" style="font-size:11pt; background:#f3e8ff; padding:15px; border-radius:10px; margin-bottom:20px; line-height:1.6; border: 2px dashed #c4b5fd; color: var(--primary-light);"></div>
   <label for="userName" style="font-size: 11pt; font-weight:bold; color: var(--primary);">👤 借用人</label>
-  <input type="text" id="userName" class="modal-input" readonly style="background:#f1f5f9; color:#64748b; border-style: dashed;">
+  <input type="text" id="userName" class="modal-input" readonly style="background:#faf5ff; color:#6d28d9; border-style: dashed;">
   <label for="purposeType" style="font-size: 11pt; font-weight:bold; color: var(--primary);">📝 用途</label>
   <select id="purposeType" class="modal-input" onchange="window.togglePurpose()">
     <option value="class">班級使用</option><option value="other">其他用途</option>
@@ -376,7 +558,7 @@
     <label for="otherPurpose" style="display:none;">請輸入其他用途</label>
     <input type="text" id="otherPurpose" class="modal-input" placeholder="請輸入用途" aria-label="請輸入其他用途">
   </div>
-  <button onclick="window.submitBooking()" style="width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold; font-size:12pt; box-shadow: 0 4px 10px rgba(18, 130, 162, 0.4);">送出預約</button>
+  <button onclick="window.submitBooking()" style="width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold; font-size:12pt; box-shadow: 0 4px 10px rgba(109, 40, 217, 0.35);">送出預約</button>
 </div>
 
 <div id="alertOverlay"></div>
@@ -460,7 +642,7 @@
           { email: "teacher1@demo.com", account: "teacher1", name: "王老師", pin: "123456", isAdmin: false },
           { email: "teacher2@demo.com", account: "teacher2", name: "李老師", pin: "123456", isAdmin: false }
         ],
-        items: ["iPad平板車-A", "iPad平板車-B", "筆電推車-A", "自然專科教室一", "音樂教室"],
+        items: ["iPad平板車-A", "iPad平板車-B", "Chromebook筆電推車-A", "電腦教室(一)", "創客資訊教室"],
         periods: [
           { name: "第一節", start: "08:10", end: "09:00" },
           { name: "第二節", start: "09:10", end: "10:00" },
@@ -537,6 +719,8 @@
     document.getElementById('adminDate').value = today;
     document.getElementById('resStartDate').value = today;
     document.getElementById('resEndDate').value = today;
+    const reportMonthEl = document.getElementById('reportMonth');
+    if (reportMonthEl) reportMonthEl.value = today.slice(0, 7);
 
     const configSnap = await getDoc(getPublicDoc('config', 'main'));
     if (configSnap.exists()) {
@@ -589,11 +773,11 @@
       const authData = { name: userObj.name, account: userObj.account, email: userObj.email, isAdmin: isTrueAdmin };
       sessionStorage.setItem('appAuthSession_FB_v3', JSON.stringify(authData));
       staticData.userInfo = authData;
-      btn.innerText = "Login 登入"; btn.disabled = false;
+      btn.innerText = "登入系統"; btn.disabled = false;
       initSPA();
     } else {
       showSystemAlert("❌ 密碼錯誤！請確認後再試。");
-      btn.innerText = "Login 登入"; btn.disabled = false;
+      btn.innerText = "登入系統"; btn.disabled = false;
     }
   };
 
@@ -638,9 +822,15 @@
   function initDropdowns() {
     const itemSel = document.getElementById('itemSelect');
     const resItem = document.getElementById('resItem');
+    const reportItemFilter = document.getElementById('reportItemFilter');
     const itemsHtml = staticData.items.map(i => `<option value="${i}">${i}</option>`).join('');
     itemSel.innerHTML = itemsHtml;
     if(resItem) resItem.innerHTML = itemsHtml;
+    if(reportItemFilter) {
+      const currentVal = reportItemFilter.value || 'ALL';
+      reportItemFilter.innerHTML = `<option value="ALL">全部設備 / 專科教室</option>` + itemsHtml;
+      reportItemFilter.value = currentVal;
+    }
     document.getElementById('classSelect').innerHTML = staticData.classes.map(c => `<option value="${c}">${c}</option>`).join('');
     
     const adminSwitchSel = document.getElementById('adminSwitchName');
@@ -727,12 +917,12 @@
         const recordsInPeriod = data.dailyAll.filter(r => r.period === p.name);
         if (recordsInPeriod.length > 0) {
           const tags = recordsInPeriod.map(r => `<div class="daily-tag">${r.item} (${r.user})</div>`).join('');
-          boardHtml += `<div style="display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px dashed #dcedc8; padding-bottom: 10px;"><div style="font-weight: bold; color: #558b2f; width: 60px; flex-shrink: 0; margin-top: 5px;">${p.name}</div><div class="daily-tags" style="margin: 0;">${tags}</div></div>`;
+          boardHtml += `<div style="display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px dashed #ddd6fe; padding-bottom: 10px;"><div style="font-weight: bold; color: var(--primary); width: 60px; flex-shrink: 0; margin-top: 5px;">${p.name}</div><div class="daily-tags" style="margin: 0;">${tags}</div></div>`;
         }
       });
       board.innerHTML = boardHtml + `</div>`;
     } else {
-      board.innerHTML = `<h3>📌 日期 (${data.tDate}) 總狀態</h3><div style="color:#888; font-size:10pt;">該日尚無預約紀錄</div>`;
+      board.innerHTML = `<h3>📌 日期 (${data.tDate}) 總狀態</h3><div style="color:#6d28d9; opacity:0.7; font-size:10pt;">該日尚無預約紀錄</div>`;
     }
     board.style.display = 'block';
   }
@@ -745,7 +935,7 @@
       const dayIdx = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
       const isTarget = d === selectedDate;
       const weekendColor = (dayIdx===0||dayIdx===6) ? 'color: var(--danger);' : '';
-      const activeBg = isTarget ? 'background: #caf0f8; box-shadow: inset 0 -3px 0 var(--primary);' : '';
+      const activeBg = isTarget ? 'background: #ddd6fe; box-shadow: inset 0 -3px 0 var(--primary);' : '';
       h += `<th style="${weekendColor}${activeBg}">${d.slice(5)}<br><span style="font-size:10pt; font-weight:normal;">(${dayNames[dayIdx]})</span></th>`;
     });
     h += `</tr>`;
@@ -753,8 +943,8 @@
     const todayStr = getLocalTodayString(); 
     const nowTs = Date.now();
     staticData.periods.forEach(p => {
-      const timeRangeHtml = (p.start && p.end) ? `<div style="font-size:8.5pt; color:#888; font-weight:normal; margin-top:2px;">${p.start}~${p.end}</div>` : '';
-      h += `<tr><td style="font-weight:bold; background:#f8fafc; color:#555;">${p.name}${timeRangeHtml}</td>`;
+      const timeRangeHtml = (p.start && p.end) ? `<div style="font-size:8.5pt; color:#7c3aed; font-weight:normal; margin-top:2px;">${p.start}~${p.end}</div>` : '';
+      h += `<tr><td style="font-weight:bold; background:#faf5ff; color:var(--primary-light);">${p.name}${timeRangeHtml}</td>`;
       data.weekDates.forEach(d => {
         const isB = data.records.find(r => r.date === d && r.period === p.name);
         const isR = data.restrictions.find(r => r.date === d && r.period === p.name);
@@ -772,7 +962,7 @@
           const currentAcc = String(staticData.userInfo.account || '').trim();
           const bookedAcc = String(isB.account || '').trim();
           const isMe = bookedAcc === currentAcc || isB.user === staticData.userInfo.name;
-          h += `<td><span class="${isMe?'cell-mine':'cell-booked'}">${isMe?'本人預約':isB.user}</span></td>`;
+          h += `<td><span class="${isMe?'cell-mine':'cell-booked'}">${isMe?'已預約 (本人)':'已預約 ('+isB.user+')'}</span></td>`;
         } 
         else if (isExpired) h += `<td><span class="cell-past">已過期</span></td>`;
         else h += `<td><button class="btn-book" onclick="window.openModal('${d}','${p.name}')">預約</button></td>`;
@@ -836,9 +1026,9 @@
       } else {
         await addDoc(getPublicCol('bookings'), {
           date: currentSel.d, period: currentSel.p, item: currentSel.item,
-          user: staticData.userInfo.name, account: staticData.userInfo.account || staticData.userInfo.name, purpose: pVal, keyStatus: "未借出", timestamp: Date.now()
+          user: staticData.userInfo.name, account: staticData.userInfo.account || staticData.userInfo.name, purpose: pVal, keyStatus: "已借出", timestamp: Date.now()
         });
-        showSystemAlert("✅ 預約成功！");
+        showSystemAlert("✅ 預約成功！（該時段已鎖定為已預約／已借出）");
       }
     } catch(err) {
       showSystemAlert("系統錯誤: " + err.message);
@@ -876,9 +1066,9 @@
       pastEnded.sort((a,b) => b.date.localeCompare(a.date));
       pastCancelled.sort((a,b) => b.date.localeCompare(a.date));
 
-      upBox.innerHTML = upcoming.length ? upcoming.map(r => window.createRecordCard(r, true)).join('') : '<div style="text-align:center; padding:30px; color:#999;">目前沒有即將到來的預約 🎉</div>';
+      upBox.innerHTML = upcoming.length ? upcoming.map(r => window.createRecordCard(r, true)).join('') : '<div style="text-align:center; padding:30px; color:#8b5cf6;">目前沒有即將到來的預約 🎉</div>';
       const pastBox = document.getElementById('list-past');
-      if (pastEnded.length === 0 && pastCancelled.length === 0) pastBox.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">目前沒有歷史紀錄</div>';
+      if (pastEnded.length === 0 && pastCancelled.length === 0) pastBox.innerHTML = '<div style="text-align:center; padding:30px; color:#8b5cf6;">目前沒有歷史紀錄</div>';
       else pastBox.innerHTML = (pastEnded.length > 0 ? `<h3 style="color:var(--gray);">☑️ 已結束</h3>` + pastEnded.map(r => window.createRecordCard(r, false)).join('') : '') +
                                (pastCancelled.length > 0 ? `<h3 style="color:var(--danger);">🚫 已取消</h3>` + pastCancelled.map(r => window.createRecordCard(r, false)).join('') : '');
     } catch(e) {
@@ -888,12 +1078,17 @@
 
   window.createRecordCard = function(r, isUpcoming) {
     const isCancelled = r.purpose === '已取消';
-    let cardClass = isCancelled ? 'card cancelled' : (isUpcoming ? 'card' : 'card past');
-    let actionHtml = isCancelled ? `<div class="status-badge status-cancelled">已取消</div>` : (isUpcoming ? `<button class="btn-cancel" onclick="window.cancelUserRecord('${r.id}', this)">取消預約</button>` : `<div style="color:var(--gray); font-size:10pt;">已結束</div>`);
+    const isReturned = r.keyStatus === '已歸還';
+    let cardClass = isCancelled ? 'card cancelled' : (isUpcoming && !isReturned ? 'card' : 'card past');
+    let actionHtml = isCancelled 
+      ? `<div class="status-badge status-cancelled">已取消</div>` 
+      : (isReturned 
+          ? `<div class="status-badge" style="background:#ecfdf5; color:var(--success); border:1px solid #a7f3d0;">✔️ 已歸還</div>` 
+          : (isUpcoming ? `<button class="btn-cancel" onclick="window.cancelUserRecord('${r.id}', this)">取消預約</button>` : `<div style="color:var(--gray); font-size:10pt;">已結束</div>`));
     return `<div class="${cardClass}">
               <div style="flex-grow:1;">
-                <div style="font-weight:bold; font-size:12pt; margin-bottom:8px; color:#333;">📅 ${r.date} &nbsp;|&nbsp; ⏱️ ${r.period}</div>
-                <div style="color:#555; font-size:10pt; line-height:1.6;">設備：<span style="font-weight:bold; color:var(--primary);">${r.item}</span><br>用途：${r.purpose}</div>
+                <div style="font-weight:bold; font-size:12pt; margin-bottom:8px; color:var(--primary-light);">📅 ${r.date} &nbsp;|&nbsp; ⏱️ ${r.period}</div>
+                <div style="color:#4c1d95; font-size:10pt; line-height:1.6;">設備：<span style="font-weight:bold; color:var(--primary);">${r.item}</span><br>用途：${r.purpose} &nbsp;|&nbsp; 狀態：<b style="color:${isCancelled?'var(--danger)':(isReturned?'var(--success)':'var(--primary)')}">${isCancelled?'已取消':(isReturned?'✔️ 已歸還':'🔑 已借出')}</b></div>
               </div>
               <div>${actionHtml}</div>
             </div>`;
@@ -920,7 +1115,7 @@
   };
 
   window.switchAdminTab = function(n) {
-    for(let i=1; i<=5; i++) {
+    for(let i=1; i<=6; i++) {
       const page = document.getElementById('admin-page'+i);
       const tab = document.getElementById('admin-t'+i);
       if(page) page.style.display = (i === n) ? 'block' : 'none';
@@ -930,6 +1125,154 @@
     if (n === 3) window.loadChart();
     if (n === 4) window.renderUserTable();
     if (n === 5) window.renderConfigLists();
+    if (n === 6) window.loadMonthlyReport();
+  };
+
+  let currentMonthlyReportData = [];
+
+  window.loadMonthlyReport = async function() {
+    if (!userId) return;
+    const monthVal = document.getElementById('reportMonth').value;
+    const itemFilter = document.getElementById('reportItemFilter').value;
+    const statusFilter = document.getElementById('reportStatusFilter').value;
+    const container = document.getElementById('monthlyReportContainer');
+    const summaryBox = document.getElementById('monthlySummaryCards');
+
+    if (!monthVal) {
+      container.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">請先選擇查詢月份</div>';
+      summaryBox.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = '<div class="skeleton"></div><div class="skeleton" style="margin-top:10px;"></div>';
+
+    try {
+      const snap = await getDocs(getPublicCol('bookings'));
+      const allRecords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      let filtered = allRecords.filter(r => r.date && r.date.startsWith(monthVal));
+      if (itemFilter !== 'ALL') {
+        filtered = filtered.filter(r => r.item === itemFilter);
+      }
+      if (statusFilter === 'VALID') {
+        filtered = filtered.filter(r => r.purpose !== '已取消');
+      }
+
+      const periodOrder = {};
+      staticData.periods.forEach((p, idx) => { periodOrder[p.name] = idx; });
+
+      filtered.sort((a, b) => {
+        const cmpDate = a.date.localeCompare(b.date);
+        if (cmpDate !== 0) return cmpDate;
+        const pA = periodOrder[a.period] !== undefined ? periodOrder[a.period] : 99;
+        const pB = periodOrder[b.period] !== undefined ? periodOrder[b.period] : 99;
+        return pA - pB;
+      });
+
+      currentMonthlyReportData = filtered;
+
+      const validList = filtered.filter(r => r.purpose !== '已取消');
+      const itemMap = {}, userMap = {};
+      validList.forEach(r => {
+        if (r.item) itemMap[r.item] = (itemMap[r.item] || 0) + 1;
+        if (r.user) userMap[r.user] = (userMap[r.user] || 0) + 1;
+      });
+
+      const topItem = Object.entries(itemMap).sort((a, b) => b[1] - a[1])[0];
+      const topUser = Object.entries(userMap).sort((a, b) => b[1] - a[1])[0];
+
+      summaryBox.innerHTML = `
+        <div style="background:#faf5ff; padding:16px; border-radius:8px; border:1px solid #ddd6fe; border-left:5px solid var(--primary);">
+          <div style="font-size:10pt; color:#6d28d9; font-weight:bold;">📌 本月有效借用總節數</div>
+          <div style="font-size:18pt; font-weight:bold; color:var(--primary-light); margin-top:6px;">${validList.length} <span style="font-size:11pt; font-weight:normal;">節</span></div>
+        </div>
+        <div style="background:#faf5ff; padding:16px; border-radius:8px; border:1px solid #ddd6fe; border-left:5px solid var(--success);">
+          <div style="font-size:10pt; color:#6d28d9; font-weight:bold;">🏆 本月最熱門資訊設備</div>
+          <div style="font-size:13pt; font-weight:bold; color:var(--success); margin-top:8px;">${topItem ? `${topItem[0]} (${topItem[1]}節)` : '尚無紀錄'}</div>
+        </div>
+        <div style="background:#faf5ff; padding:16px; border-radius:8px; border:1px solid #ddd6fe; border-left:5px solid var(--admin-purple);">
+          <div style="font-size:10pt; color:#6d28d9; font-weight:bold;">👨‍🏫 本月借用最多教師</div>
+          <div style="font-size:13pt; font-weight:bold; color:var(--admin-purple); margin-top:8px;">${topUser ? `${topUser[0]} (${topUser[1]}節)` : '尚無紀錄'}</div>
+        </div>
+      `;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:35px; color:#7c3aed; background:#fff; border-radius:8px; border:1px dashed #c4b5fd;">📭 ${monthVal} 尚無符合條件的預約紀錄</div>`;
+        return;
+      }
+
+      let tableHtml = `
+        <table>
+          <tr>
+            <th style="width:16%;">借用日期</th>
+            <th style="width:14%;">節次</th>
+            <th style="width:26%;">設備 / 專科教室</th>
+            <th style="width:14%;">借用教師</th>
+            <th style="width:16%;">班級 / 用途</th>
+            <th style="width:14%;">設備 / 狀態</th>
+          </tr>
+      `;
+
+      filtered.forEach(r => {
+        const parts = r.date.split('-').map(Number);
+        const dayIdx = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
+        const isCancelled = r.purpose === '已取消';
+        const rowStyle = isCancelled ? 'background:#fff5f5; color:#999;' : '';
+        let statusBadge = '';
+        if (isCancelled) {
+          statusBadge = `<span style="color:var(--danger); font-weight:bold;">已取消</span>`;
+        } else if (r.keyStatus === '已歸還') {
+          statusBadge = `<span style="color:var(--success); font-weight:bold;">✔️ 已歸還</span>`;
+        } else {
+          statusBadge = `<span style="color:var(--danger); font-weight:bold;">🔑 已借出</span>`;
+        }
+
+        tableHtml += `
+          <tr style="${rowStyle}">
+            <td style="font-weight:bold;">${r.date} (${dayNames[dayIdx]})</td>
+            <td>${r.period}</td>
+            <td style="font-weight:bold; color:var(--primary-light);">${r.item}</td>
+            <td>${r.user}</td>
+            <td>${r.purpose}</td>
+            <td>${statusBadge}</td>
+          </tr>
+        `;
+      });
+
+      container.innerHTML = tableHtml + `</table>`;
+    } catch (err) {
+      console.error("載入月報表失敗:", err);
+      container.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">讀取月報表失敗：${err.message}</div>`;
+    }
+  };
+
+  window.exportMonthlyReportExcel = function() {
+    const monthVal = document.getElementById('reportMonth').value || '未指定月份';
+    if (!currentMonthlyReportData || currentMonthlyReportData.length === 0) {
+      showSystemAlert("⚠️ 目前畫面中沒有可匯出的預約紀錄！");
+      return;
+    }
+
+    const exportRows = currentMonthlyReportData.map((r, idx) => {
+      const parts = r.date.split('-').map(Number);
+      const dayIdx = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
+      return {
+        "序號": idx + 1,
+        "借用日期": r.date,
+        "星期": dayNames[dayIdx],
+        "節次": r.period,
+        "設備/專科教室": r.item,
+        "借用教師": r.user,
+        "帳號": r.account || '',
+        "使用班級/用途": r.purpose,
+        "設備狀態": r.purpose === '已取消' ? '已取消' : (r.keyStatus === '已歸還' ? '已歸還' : '已借出')
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${monthVal}預約報表`);
+    XLSX.writeFile(workbook, `教學設備預約月報表_${monthVal}.xlsx`);
   };
 
   window.saveConfigListsToDB = async function() {
@@ -950,8 +1293,8 @@
     const itemsBox = document.getElementById('itemsListContainer');
     if (itemsBox) {
       itemsBox.innerHTML = staticData.items.length === 0 ? '<div style="color:#999; text-align:center; padding:15px;">尚無設備項目</div>' : staticData.items.map((item, idx) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
-          <span style="font-weight:bold; color:#333; word-break:break-all;">${item}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #ede9fe; gap:8px;">
+          <span style="font-weight:bold; color:var(--text-dark); word-break:break-all;">${item}</span>
           <div style="display:flex; gap:6px; flex-shrink:0;">
             <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editItemConfig(${idx})">修改</button>
             <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteItemConfig(${idx})">刪除</button>
@@ -962,8 +1305,8 @@
     const classesBox = document.getElementById('classesListContainer');
     if (classesBox) {
       classesBox.innerHTML = staticData.classes.length === 0 ? '<div style="color:#999; text-align:center; padding:15px;">尚無班級項目</div>' : staticData.classes.map((cls, idx) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px;">
-          <span style="font-weight:bold; color:#333; word-break:break-all;">${cls}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #ede9fe; gap:8px;">
+          <span style="font-weight:bold; color:var(--text-dark); word-break:break-all;">${cls}</span>
           <div style="display:flex; gap:6px; flex-shrink:0;">
             <button class="btn-admin-inactive" style="padding:4px 10px; font-size:9pt;" onclick="window.editClassConfig(${idx})">修改</button>
             <button class="btn-cancel" style="padding:4px 10px; font-size:9pt;" onclick="window.deleteClassConfig(${idx})">刪除</button>
@@ -974,10 +1317,10 @@
     const periodsBox = document.getElementById('periodsListContainer');
     if (periodsBox) {
       periodsBox.innerHTML = staticData.periods.length === 0 ? '<div style="color:#999; text-align:center; padding:15px;">尚無節次設定</div>' : staticData.periods.map((p, idx) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:10px 14px; border-radius:8px; border:1px solid #ede9fe; gap:8px; flex-wrap:wrap;">
           <div style="display:flex; align-items:center; gap:12px;">
             <span style="font-weight:bold; color:var(--primary-light); min-width:70px;">${p.name}</span>
-            <span style="background:#e0fbfc; color:var(--primary); padding:4px 10px; border-radius:15px; font-size:10pt; font-weight:bold;">🕒 ${p.start || '--:--'} ~ ${p.end || '--:--'}</span>
+            <span style="background:#f3e8ff; color:var(--primary); padding:4px 10px; border-radius:15px; font-size:10pt; font-weight:bold;">🕒 ${p.start || '--:--'} ~ ${p.end || '--:--'}</span>
           </div>
           <div style="display:flex; gap:6px; flex-shrink:0;">
             <button class="btn-admin-inactive" style="padding:4px 8px; font-size:9pt;" onclick="window.movePeriodConfig(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;padding:4px 8px;font-size:9pt;"' : ''} title="上移">⬆️</button>
@@ -1013,19 +1356,19 @@
     const modal = document.getElementById('customModal');
     document.getElementById('customModalTitle').innerText = "✏️ 修改節次與時間";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="text-align:left; font-size:10pt; color:#555; font-weight:bold; margin-bottom:4px;"><label for="editPeriodName">節次名稱</label></div>
+      <div style="text-align:left; font-size:10pt; color:#4c1d95; font-weight:bold; margin-bottom:4px;"><label for="editPeriodName">節次名稱</label></div>
       <input type="text" id="editPeriodName" class="modal-input modal-input-admin" value="${oldP.name}" placeholder="節次名稱" aria-label="節次名稱" style="margin-bottom:12px;">
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:left; margin-bottom:12px;">
         <div>
-          <label for="editPeriodStart" style="font-size:10pt; color:#555; font-weight:bold;">開始時間</label>
+          <label for="editPeriodStart" style="font-size:10pt; color:#4c1d95; font-weight:bold;">開始時間</label>
           <input type="time" id="editPeriodStart" class="modal-input modal-input-admin" value="${oldP.start || '08:00'}" style="margin-bottom:0;">
         </div>
         <div>
-          <label for="editPeriodEnd" style="font-size:10pt; color:#555; font-weight:bold;">結束時間</label>
+          <label for="editPeriodEnd" style="font-size:10pt; color:#4c1d95; font-weight:bold;">結束時間</label>
           <input type="time" id="editPeriodEnd" class="modal-input modal-input-admin" value="${oldP.end || '09:00'}" style="margin-bottom:0;">
         </div>
       </div>
-      <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#555; cursor:pointer; text-align:left; margin-bottom:10px;">
+      <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#4c1d95; cursor:pointer; text-align:left; margin-bottom:10px;">
         <input type="checkbox" id="syncPeriodHistory" checked> 若修改節次名稱，同步更新已預約紀錄與禁借設定
       </label>`;
 
@@ -1090,11 +1433,11 @@
     const oldVal = staticData.items[idx];
     document.getElementById('alertOverlay').style.display = 'block';
     const modal = document.getElementById('customModal');
-    document.getElementById('customModalTitle').innerText = "✏️ 修改設備/教室名稱";
+    document.getElementById('customModalTitle').innerText = "✏️ 修改ipad充電車名稱";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;"><label for="editConfigInput">原名稱：<b>${oldVal}</b></label></div>
+      <div style="font-size:10pt; color:#4c1d95; margin-bottom:10px; text-align:left;"><label for="editConfigInput">原名稱：<b>${oldVal}</b></label></div>
       <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新名稱" aria-label="請輸入新設備或教室名稱">
-      <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#555; cursor:pointer; text-align:left; margin-bottom:10px;">
+      <label style="display:flex; align-items:center; gap:6px; font-size:10pt; color:#4c1d95; cursor:pointer; text-align:left; margin-bottom:10px;">
         <input type="checkbox" id="syncHistoryRecords" checked> 同步更新已預約紀錄與禁借設定中的設備名稱
       </label>`;
     const submitBtn = document.getElementById('customModalSubmit');
@@ -1135,7 +1478,7 @@
     const modal = document.getElementById('customModal');
     document.getElementById('customModalTitle').innerText = "✏️ 修改班級名稱";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="font-size:10pt; color:#666; margin-bottom:10px; text-align:left;"><label for="editConfigInput">原班級：<b>${oldVal}</b></label></div>
+      <div style="font-size:10pt; color:#4c1d95; margin-bottom:10px; text-align:left;"><label for="editConfigInput">原班級：<b>${oldVal}</b></label></div>
       <input type="text" id="editConfigInput" class="modal-input modal-input-admin" value="${oldVal}" placeholder="請輸入新班級名稱" aria-label="請輸入新班級名稱">`;
     const submitBtn = document.getElementById('customModalSubmit');
     submitBtn.onclick = async function() {
@@ -1163,8 +1506,8 @@
   window.addItemConfig = async function() {
     const input = document.getElementById('newItemInput');
     const val = input.value.trim();
-    if (!val) { showSystemAlert("請輸入設備或專科教室名稱！"); return; }
-    if (staticData.items.includes(val)) { showSystemAlert("⚠️ 該設備/教室名稱已存在！"); return; }
+    if (!val) { showSystemAlert("請輸入ipad充電車名稱！"); return; }
+    if (staticData.items.includes(val)) { showSystemAlert("⚠️ 該ipad充電車名稱已存在！"); return; }
     staticData.items.push(val);
     input.value = '';
     await window.saveConfigListsToDB();
@@ -1211,23 +1554,22 @@
       const snap = await getDocs(getPublicCol('bookings'));
       const records = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(r => r.date === targetDate && r.purpose !== "已取消");
       if(records.length === 0) { 
-        box.innerHTML = "<div style='text-align:center; padding:30px; color:#999; background:#fff; border-radius:8px; border:2px dashed #caf0f8;'>本日無預約紀錄</div>"; 
+        box.innerHTML = "<div style='text-align:center; padding:30px; color:#8b5cf6; background:#fff; border-radius:8px; border:2px dashed #ddd6fe;'>本日無預約紀錄</div>"; 
         return; 
       }
       let html = '';
       staticData.periods.forEach(p => {
         const pRecords = records.filter(r => r.period === p.name);
         if (pRecords.length > 0) {
-          html += `<h3 style="color:var(--admin-purple); margin: 20px 0 10px 0; border-bottom: 2px solid #ebfbfb; padding-bottom: 5px; font-size: 13pt;">📍 ${p.name}</h3>`;
+          html += `<h3 style="color:var(--admin-purple); margin: 20px 0 10px 0; border-bottom: 2px solid #ede9fe; padding-bottom: 5px; font-size: 13pt;">📍 ${p.name}</h3>`;
           html += pRecords.map(r => `
             <div class="admin-card">
-              <div style="font-weight:bold; font-size:12pt; color:#333;">${r.item}</div>
-              <div style="color:#666; margin-top:5px; font-size:11pt;">借用人：<span style="color:var(--admin-purple); font-weight:bold;">${r.user}</span> (${r.purpose})</div>
+              <div style="font-weight:bold; font-size:12pt; color:var(--primary-light);">${r.item}</div>
+              <div style="color:#4c1d95; margin-top:5px; font-size:11pt;">借用人：<span style="color:var(--admin-purple); font-weight:bold;">${r.user}</span> (${r.purpose})</div>
               <div class="key-group" style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-                <span style="font-weight:bold; color:#555; font-size:11pt;">🔑 鑰匙：</span>
-                <button class="key-btn ${r.keyStatus==='未借出'?'active-unlent':''}" onclick="window.setKey('${r.id}', '未借出', this)">未借出</button>
-                <button class="key-btn ${r.keyStatus==='已借出'?'active-lent':''}" onclick="window.setKey('${r.id}', '已借出', this)">已借出</button>
-                <button class="key-btn ${r.keyStatus==='已歸還'?'active-returned':''}" onclick="window.setKey('${r.id}', '已歸還', this)">已歸還</button>
+                <span style="font-weight:bold; color:#4c1d95; font-size:11pt;">🔑 狀態：</span>
+                <button class="key-btn ${r.keyStatus!=='已歸還'?'active-lent':''}" onclick="window.setKey('${r.id}', '已借出', this)">🔑 已借出</button>
+                <button class="key-btn ${r.keyStatus==='已歸還'?'active-returned':''}" onclick="window.setKey('${r.id}', '已歸還', this)">✔️ 已歸還</button>
               </div>
             </div>`).join('');
         }
@@ -1305,7 +1647,7 @@
         type: 'bar',
         data: {
           labels: items.map(d => d.name),
-          datasets: [{ label: '設備借用總次數', data: items.map(d => d.count), backgroundColor: 'rgba(0, 100, 102, 0.6)', borderColor: 'rgba(0, 100, 102, 1)', borderWidth: 1, borderRadius: 4 }]
+          datasets: [{ label: '資訊設備借用總次數', data: items.map(d => d.count), backgroundColor: 'rgba(109, 40, 217, 0.65)', borderColor: 'rgba(76, 29, 149, 1)', borderWidth: 1.5, borderRadius: 6 }]
         },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
       });
@@ -1328,11 +1670,11 @@
     let html = `<table><tr><th style="width:20%">姓名</th><th style="width:28%">帳號/Email</th><th style="width:22%">權限身分</th><th style="width:30%">操作</th></tr>`;
     staticData.users.forEach((u, i) => {
       const isUserAdmin = u.isAdmin === true || u.isAdmin === 'true';
-      const roleTxt = isUserAdmin ? '<span style="color:var(--admin-purple); font-weight:bold; background:#e0fbfc; padding:4px 10px; border-radius:12px;">管理員</span>' : '<span style="color:#78909c;">一般教師</span>';
+      const roleTxt = isUserAdmin ? '<span style="color:var(--admin-purple); font-weight:bold; background:#f3e8ff; padding:4px 10px; border-radius:12px; border:1px solid #c4b5fd;">管理員</span>' : '<span style="color:#6b7280;">一般教師</span>';
       const toggleRoleBtnTxt = isUserAdmin ? '設為一般教師' : '設為管理員';
       html += `<tr>
           <td style="font-weight:bold;">${u.name}</td>
-          <td style="color:#555;">${u.account || u.email || '--'}</td>
+          <td style="color:#4c1d95;">${u.account || u.email || '--'}</td>
           <td>${roleTxt}</td>
           <td>
             <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
@@ -1417,7 +1759,7 @@
     const modal = document.getElementById('customModal');
     document.getElementById('customModalTitle').innerText = "🔑 修改登入密碼";
     document.getElementById('customModalBody').innerHTML = `
-      <div style="font-size:10pt; color:#666; margin-bottom:15px; text-align:left;">請輸入您的新密碼。變更後，下次登入請使用新密碼。</div>
+      <div style="font-size:10pt; color:#4c1d95; margin-bottom:15px; text-align:left;">請輸入您的新密碼。變更後，下次登入請使用新密碼。</div>
       <label for="newPwdInput" style="display:none;">請輸入新密碼</label>
       <input type="password" id="newPwdInput" class="modal-input modal-input-admin" placeholder="請輸入新密碼" aria-label="請輸入新密碼" autocomplete="new-password">
       <label for="newPwdConfirm" style="display:none;">再次確認新密碼</label>
