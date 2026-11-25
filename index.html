@@ -303,8 +303,8 @@
 
   <div class="login-wrapper">
     <div class="login-box">
-      <h2>資訊設備預約系統</h2>
-      <div class="login-subtitle">電腦、平板設備與專科教室借用平台</div>
+      <h2>教室預約系統</h2>
+      <div class="login-subtitle">電腦、平板設備與教室借用平台</div>
       <label for="loginNameSelect" style="display:none;">選擇您的姓名</label>
       <select id="loginNameSelect" class="login-input" style="margin-bottom: 15px;" aria-label="選擇您的姓名" autocomplete="username">
         <option value="">載入名單中...</option>
@@ -366,7 +366,7 @@
             <input type="date" id="targetDate" onchange="window.refreshBooking()">
           </div>
           <div>
-            <label for="itemSelect">💻 選擇ipad充電車</label>
+            <label for="itemSelect">💻 選擇預約事物</label>
             <select id="itemSelect" onchange="window.refreshBooking()"></select>
           </div>
         </div>
@@ -406,7 +406,7 @@
 
         <div id="admin-page2" style="display:none;">
           <div class="form-row">
-            <label class="title" for="resItem">💻 選擇禁借ipad充電車</label>
+            <label class="title" for="resItem">💻 選擇禁借事物</label>
             <select id="resItem"></select>
           </div>
           <div class="form-row">
@@ -478,10 +478,10 @@
             </div>
 
             <div class="config-card">
-              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">🏫 班級清單設定</h3>
+              <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">🏫 借用名單設定</h3>
               <div style="display:flex; gap:8px; margin-bottom:15px; width:100%; align-items:stretch;">
-                <label for="newClassInput" style="display:none;">輸入新班級名稱</label>
-                <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新班級 (如: 401、科任)..." aria-label="輸入新班級名稱">
+                <label for="newClassInput" style="display:none;">輸入名稱</label>
+                <input type="text" id="newClassInput" class="admin-input" placeholder="輸入新事物 (如: 401、科任)..." aria-label="輸入新事物名稱">
                 <button class="btn-admin-active" onclick="window.addClassConfig()" style="white-space:nowrap;">➕ 新增</button>
               </div>
               <div id="classesListContainer" style="display:flex; flex-direction:column; gap:8px; height:360px; overflow-y:auto; padding-right:4px;"></div>
@@ -548,11 +548,11 @@
   <input type="text" id="userName" class="modal-input" readonly style="background:#faf5ff; color:#6d28d9; border-style: dashed;">
   <label for="purposeType" style="font-size: 11pt; font-weight:bold; color: var(--primary);">📝 用途</label>
   <select id="purposeType" class="modal-input" onchange="window.togglePurpose()">
-    <option value="class">班級使用</option><option value="other">其他用途</option>
+    <option value="class">教師使用</option><option value="other">其他用途</option>
   </select>
   <div id="classDiv">
-    <label for="classSelect" style="display:none;">選擇使用班級</label>
-    <select id="classSelect" class="modal-input" aria-label="選擇使用班級"></select>
+    <label for="classSelect" style="display:none;">選擇使用教師</label>
+    <select id="classSelect" class="modal-input" aria-label="選擇使用教師"></select>
   </div>
   <div id="otherDiv" style="display:none;">
     <label for="otherPurpose" style="display:none;">請輸入其他用途</label>
